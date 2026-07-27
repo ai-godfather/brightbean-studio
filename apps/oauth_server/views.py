@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlparse
 
 from django.core.cache import cache
 from django.http import JsonResponse
@@ -24,7 +24,9 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
+from oauth2_provider.http import OAuth2ResponseRedirect
 from oauth2_provider.models import get_application_model
+from oauth2_provider.views import AuthorizationView
 
 from .metadata import authorization_server_metadata, protected_resource_metadata
 
@@ -108,6 +110,56 @@ def _is_allowed_redirect_uri(value) -> bool:
         return parsed.port is not None
     except ValueError:
         return False
+
+
+def _matches_registered_loopback_response(redirect_to: str, registered_uri: str) -> bool:
+    """Match an OAuth response URL to its registered native callback.
+
+    OAuthlib appends ``code`` and ``state`` to the registered redirect URI.
+    Compare the origin and path exactly, then require every pre-registered
+    query item to remain present.  This prevents enabling arbitrary HTTP
+    redirects merely because the global scheme check is being relaxed for a
+    native loopback response.
+    """
+    if not _is_allowed_redirect_uri(redirect_to) or not _is_allowed_redirect_uri(registered_uri):
+        return False
+
+    response = urlparse(redirect_to)
+    registered = urlparse(registered_uri)
+    if response.scheme != "http" or registered.scheme != "http":
+        return False
+    try:
+        same_target = (
+            response.hostname == registered.hostname
+            and response.port == registered.port
+            and response.path == registered.path
+            and response.params == registered.params
+        )
+    except ValueError:
+        return False
+    if not same_target:
+        return False
+
+    response_query = parse_qsl(response.query, keep_blank_values=True)
+    registered_query = parse_qsl(registered.query, keep_blank_values=True)
+    return all(item in response_query for item in registered_query)
+
+
+class NativeLoopbackAuthorizationView(AuthorizationView):
+    """Allow post-consent redirects only to the app's registered loopback.
+
+    The provider remains HTTPS-only globally.  RFC 8252 native clients such as
+    Codex get a narrow exception for their registered localhost callback with
+    an explicit ephemeral port.
+    """
+
+    def redirect(self, redirect_to, application):
+        if application is not None and any(
+            _matches_registered_loopback_response(redirect_to, registered_uri)
+            for registered_uri in application.redirect_uris.split()
+        ):
+            return OAuth2ResponseRedirect(redirect_to, ["http"])
+        return super().redirect(redirect_to, application)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

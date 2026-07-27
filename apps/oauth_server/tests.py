@@ -162,6 +162,74 @@ class TestOAuthSecuritySettings:
         assert all(settings.OAUTH2_PROVIDER[flag] is True for flag in required_flags)
 
 
+@pytest.mark.django_db
+class TestAuthorizationResponseRedirects:
+    @pytest.mark.parametrize("redirect_uri", CODEX_LOOPBACK_REDIRECTS)
+    def test_allows_native_loopback_after_consent(self, redirect_uri):
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Codex",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris=redirect_uri,
+        )
+
+        response = NativeLoopbackAuthorizationView().redirect(
+            f"{redirect_uri}?code=authorization-code&state=state",
+            application,
+        )
+
+        assert response.status_code == 302
+        assert response["Location"].startswith(redirect_uri)
+
+    def test_rejects_non_loopback_http_after_consent(self):
+        from django.core.exceptions import DisallowedRedirect
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Unsafe client",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="http://evil.example.com/callback",
+        )
+
+        with pytest.raises(DisallowedRedirect):
+            NativeLoopbackAuthorizationView().redirect(
+                "http://evil.example.com/callback?code=authorization-code",
+                application,
+            )
+
+    def test_rejects_unregistered_loopback_after_consent(self):
+        from django.core.exceptions import DisallowedRedirect
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Codex",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="http://127.0.0.1:45123/callback",
+        )
+
+        with pytest.raises(DisallowedRedirect):
+            NativeLoopbackAuthorizationView().redirect(
+                "http://127.0.0.1:45124/callback?code=authorization-code",
+                application,
+            )
+
+    def test_global_redirect_schemes_remain_https_only(self):
+        assert settings.OAUTH2_PROVIDER["ALLOWED_REDIRECT_URI_SCHEMES"] == ["https"]
+
+
 class _FakeOAuthRequest:
     """Minimal oauthlib-style request for the validator unit tests.
 
