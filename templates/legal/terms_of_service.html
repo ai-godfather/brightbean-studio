@@ -1,0 +1,136 @@
+{% extends "legal/base.html" %}
+
+{% block title %}Terms of Service{% endblock %}
+{% block meta_description %}Terms governing use of BrightBean Social Studio at studio.shopauth.cloud.{% endblock %}
+{% block heading %}Terms of Service{% endblock %}
+
+{% block content %}
+<p class="summary">
+    These Terms govern your access to BrightBean Social Studio at
+    <strong>studio.shopauth.cloud</strong>. By creating an account, connecting a social profile, or
+    using the service, you agree to these Terms and our Privacy Policy.
+</p>
+
+<h2>1. Service operator</h2>
+<p>
+    This BrightBean Studio deployment is operated by ShopAuth Cloud (“we”, “us”). Questions about
+    these Terms may be sent to <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>.
+</p>
+
+<h2>2. Eligibility and accounts</h2>
+<ul>
+    <li>You must be at least 18, or legally able to enter into this agreement in your jurisdiction.</li>
+    <li>You must provide accurate account information and keep login credentials secure.</li>
+    <li>You are responsible for activity performed by your account, team members, API keys, and configured agents.</li>
+    <li>You must notify us promptly if you suspect unauthorized access.</li>
+</ul>
+
+<h2>3. Connecting social accounts</h2>
+<p>
+    You may connect only accounts and business assets that you own or are authorized to manage. You
+    authorize BrightBean Studio to use the permissions you approve to perform requested or scheduled
+    actions, including publishing, analytics, comment moderation, and messaging.
+</p>
+<p>
+    Your use of a connected service remains subject to that platform’s terms, policies, permissions,
+    rate limits, review requirements, and technical restrictions. We do not control and cannot
+    guarantee the availability of third-party APIs.
+</p>
+
+<h2>4. Your content and instructions</h2>
+<p>
+    You retain ownership of content you upload or create. You grant us a limited, non-exclusive
+    license to host, process, reproduce, and transmit that content only as needed to provide,
+    secure, and support the service.
+</p>
+<p>
+    You are responsible for reviewing drafts, captions, media, recipients, target accounts, and
+    publication times before authorizing publication. AI-generated suggestions may be inaccurate,
+    incomplete, or unsuitable; they require human review. You are responsible for the final content
+    and its compliance with law, advertising rules, intellectual-property rights, and platform
+    policies.
+</p>
+
+<h2>5. Acceptable use</h2>
+<p>You must not use BrightBean Studio to:</p>
+<ul>
+    <li>Publish unlawful, deceptive, infringing, harassing, discriminatory, or malicious content.</li>
+    <li>Send spam, conduct unauthorized surveillance, impersonate others, or manipulate engagement.</li>
+    <li>Access or message people without a lawful basis or required consent.</li>
+    <li>Circumvent platform permissions, rate limits, reviews, safeguards, or account restrictions.</li>
+    <li>Probe, disrupt, reverse engineer, or compromise the service or another user’s data.</li>
+    <li>Share access tokens, secrets, or API keys with unauthorized parties.</li>
+</ul>
+
+<h2>6. Automated actions and messaging</h2>
+<p>
+    Automation rules and AI agents act according to the permissions and instructions configured by
+    authorized workspace users. You must monitor automated activity, provide appropriate human
+    oversight, and comply with platform-specific messaging windows, disclosure rules, and
+    restrictions. We may pause automation that threatens users, connected accounts, or service
+    integrity.
+</p>
+
+<h2>7. Intellectual property</h2>
+<p>
+    BrightBean Studio, its software, interface, branding, and documentation are protected by
+    intellectual-property laws. Except for rights expressly granted in these Terms, we and our
+    licensors retain all rights in the service. Feedback may be used to improve the service without
+    obligation to you.
+</p>
+
+<h2>8. Availability and changes</h2>
+<p>
+    We may update, add, remove, or suspend features, including when a third-party API changes. We aim
+    to operate the service reliably, but do not promise uninterrupted or error-free availability.
+    Scheduled posts and messages can fail because of invalid permissions, platform outages, content
+    rejection, rate limits, or other external conditions.
+</p>
+
+<h2>9. Suspension and termination</h2>
+<p>
+    You may stop using the service at any time and may request deletion as described on the
+    <a href="{% url 'data_deletion' %}">Data Deletion page</a>. We may restrict or terminate access
+    where reasonably necessary to address a security risk, legal requirement, non-payment, material
+    breach, abuse, or platform-policy violation. Where practical, we will provide notice and an
+    opportunity to correct the issue.
+</p>
+
+<h2>10. Disclaimers</h2>
+<p>
+    To the extent permitted by law, the service is provided “as is” and “as available”. We disclaim
+    implied warranties of merchantability, fitness for a particular purpose, non-infringement, and
+    guarantees about reach, engagement, revenue, platform approval, or social-account status.
+</p>
+
+<h2>11. Limitation of liability</h2>
+<p>
+    To the extent permitted by law, we are not liable for indirect, incidental, special,
+    consequential, or punitive damages, lost profits, lost opportunities, loss of data, or actions
+    taken by a connected platform. Nothing in these Terms excludes liability that cannot legally be
+    excluded or limits mandatory consumer rights.
+</p>
+
+<h2>12. General terms</h2>
+<p>
+    If part of these Terms is unenforceable, the remaining provisions continue in effect. Failure to
+    enforce a provision is not a waiver. You may not transfer this agreement without our consent.
+    The laws applicable at the operator’s place of establishment govern these Terms, subject to
+    mandatory consumer protections and conflict-of-law rules.
+</p>
+
+<h2>13. Changes to these Terms</h2>
+<p>
+    We may revise these Terms when the service or legal requirements change. Material changes will
+    be announced by a reasonable method. Continued use after the effective date of an update means
+    you accept the revised Terms.
+</p>
+
+<div class="contact-card">
+    <h2>Contact</h2>
+    <p>
+        Questions about these Terms can be sent to
+        <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>.
+    </p>
+</div>
+{% endblock %}

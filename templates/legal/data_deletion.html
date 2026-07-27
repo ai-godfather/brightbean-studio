@@ -1,0 +1,84 @@
+{% extends "legal/base.html" %}
+
+{% block title %}Data Deletion Instructions{% endblock %}
+{% block meta_description %}How to disconnect Instagram or another social account and request deletion of BrightBean Social Studio data.{% endblock %}
+{% block heading %}Data Deletion Instructions{% endblock %}
+
+{% block content %}
+<p class="summary">
+    You can disconnect a social account at any time and can request deletion of your BrightBean
+    Studio account and associated personal data. You do not need to provide your Instagram or
+    Facebook password.
+</p>
+
+<h2>Option 1: Disconnect a social account</h2>
+<ol>
+    <li>Sign in to <a href="/">BrightBean Studio</a>.</li>
+    <li>Open <strong>Social Accounts</strong> for the relevant workspace.</li>
+    <li>Select the connected account and choose <strong>Disconnect</strong> or <strong>Remove</strong>.</li>
+    <li>
+        For additional control, open the connected platform’s account settings and revoke
+        BrightBean Studio / Social Studio access.
+    </li>
+</ol>
+<p>
+    Disconnecting stops new API access for that account and removes the active authorization from
+    BrightBean Studio. Content already published to the social platform remains there until you
+    remove it on that platform.
+</p>
+
+<h2>Option 2: Delete your BrightBean Studio account</h2>
+<p>
+    If your account settings show a <strong>Delete account</strong> action, you can submit deletion
+    there. Workspace owners may first need to transfer ownership or delete the organization to avoid
+    removing data belonging to other team members.
+</p>
+
+<h2>Option 3: Send a deletion request</h2>
+<p>
+    Email <a href="mailto:admin@shopauth.cloud?subject=BrightBean%20Studio%20data%20deletion%20request">admin@shopauth.cloud</a>
+    with the subject <strong>“BrightBean Studio data deletion request”</strong> and include:
+</p>
+<ul>
+    <li>The email address used for your BrightBean Studio account.</li>
+    <li>The organization or workspace name, if applicable.</li>
+    <li>The username of any connected Instagram, Facebook, or other social account to be removed.</li>
+    <li>Whether you want one integration removed or the entire BrightBean Studio account deleted.</li>
+</ul>
+<p>
+    Do not include passwords, access tokens, recovery codes, or other secrets. We may ask for a
+    reasonable identity-verification step before deleting data.
+</p>
+
+<h2>What happens next</h2>
+<ul>
+    <li>We will acknowledge a valid request within 7 days.</li>
+    <li>We will complete deletion within 30 days unless a legal or security exception applies.</li>
+    <li>OAuth credentials and active social-platform access will be revoked or removed.</li>
+    <li>Account profile data, workspace data you solely control, drafts, media, schedules, and stored platform data covered by the request will be deleted or irreversibly anonymized.</li>
+    <li>Shared workspace content may remain under another authorized owner where deletion is not legally required.</li>
+</ul>
+
+<h2>Backups and required retention</h2>
+<p>
+    Residual copies may remain in encrypted backups and limited security logs for up to 90 days
+    before automatic rotation. We may retain the minimum data necessary to meet legal obligations,
+    resolve disputes, prevent fraud, or document completion of the request. Retained data is not
+    used for normal product features.
+</p>
+
+<h2>Removing data from Meta or Instagram</h2>
+<p>
+    Deleting data from BrightBean Studio does not automatically delete posts, messages, or account
+    data held independently by Meta or Instagram. Use the relevant platform’s controls to delete
+    platform-hosted content or the social account itself.
+</p>
+
+<div class="contact-card">
+    <h2>Need help?</h2>
+    <p>
+        Contact <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>. We will help identify
+        the connected account and confirm when the BrightBean Studio deletion process is complete.
+    </p>
+</div>
+{% endblock %}
