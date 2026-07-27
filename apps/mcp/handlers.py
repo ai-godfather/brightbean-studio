@@ -679,7 +679,7 @@ register_tool(
 
 
 def _upload_media(args: dict, context: dict[str, Any]) -> dict:
-    """MCP-side upload accepts base64 content (≤5 MB).
+    """MCP-side upload accepts base64 content (≤1 MB).
 
     For larger files agents must use ``POST /api/v1/media/`` over REST —
     multipart can't ride a JSON-RPC envelope cleanly.
@@ -767,7 +767,7 @@ register_tool(
                 "filename": {"type": "string", "maxLength": 255},
                 "content_base64": {
                     "type": "string",
-                    "description": "Base64-encoded file content. Decoded size must be ≤5 MB.",
+                    "description": "Base64-encoded file content. Decoded size must be ≤1 MB.",
                 },
                 "content_type": {"type": "string"},
                 "alt_text": {"type": "string", "maxLength": 2000},

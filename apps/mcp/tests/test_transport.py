@@ -209,6 +209,8 @@ class TestProtocolMechanics:
         assert status == 200
         result = body["result"]
         assert result["serverInfo"]["name"] == "brightbean-studio"
+        assert "request_media_upload" in result["instructions"]
+        assert "confirmed" in result["instructions"]
         assert "protocolVersion" in result
         assert "tools" in result["capabilities"]
 

@@ -91,7 +91,7 @@ def upload(
 
     Body is ``multipart/form-data`` because agents posting videos can't
     cleanly base64-encode 100 MB into JSON. MCP gets a separate
-    ``upload_media`` tool that accepts base64 for small files (≤5 MB).
+    ``upload_media`` tool that accepts base64 for small files (≤1 MB).
 
     ``alt_text`` / ``title`` / ``folder_id`` / ``tags`` are optional and
     persisted alongside the asset, saving the agent a follow-up PATCH.
