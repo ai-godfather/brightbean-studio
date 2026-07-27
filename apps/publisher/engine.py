@@ -428,6 +428,8 @@ class PublishEngine:
             # Resolve cover_image_asset_id → temp file (Pinterest video pins)
             cover_asset_id = extra.pop("cover_image_asset_id", None)
             if cover_asset_id:
+                from apps.media_library.models import MediaAsset
+
                 try:
                     cover_asset = MediaAsset.objects.get(id=cover_asset_id)
                     if cover_asset.file:
