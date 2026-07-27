@@ -17,6 +17,11 @@ AS_META_URL = "/.well-known/oauth-authorization-server"
 PR_META_URL = "/.well-known/oauth-protected-resource"
 PR_META_MCP_URL = "/.well-known/oauth-protected-resource/api/v1/mcp"
 CLAUDE_REDIRECT = "https://claude.ai/api/mcp/auth_callback"
+CODEX_LOOPBACK_REDIRECTS = (
+    "http://127.0.0.1:45123/callback",
+    "http://localhost:45123/callback",
+    "http://[::1]:45123/callback",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -55,6 +60,31 @@ class TestDynamicClientRegistration:
         app = get_application_model().objects.get(client_id=data["client_id"])
         assert app.client_type == app.CLIENT_PUBLIC
         assert app.authorization_grant_type == app.GRANT_AUTHORIZATION_CODE
+
+    @pytest.mark.parametrize("redirect_uri", CODEX_LOOPBACK_REDIRECTS)
+    def test_registers_native_client_with_http_loopback_redirect(self, redirect_uri):
+        r = _register(
+            Client(),
+            {"client_name": "Codex", "redirect_uris": [redirect_uri], "token_endpoint_auth_method": "none"},
+        )
+
+        assert r.status_code == 201
+        assert r.json()["redirect_uris"] == [redirect_uri]
+
+    @pytest.mark.parametrize(
+        "redirect_uri",
+        (
+            "http://localhost/callback",
+            "http://user@localhost:45123/callback",
+            "http://localhost.evil.example:45123/callback",
+            "http://127.0.0.1.evil.example:45123/callback",
+        ),
+    )
+    def test_rejects_unsafe_http_loopback_lookalikes(self, redirect_uri):
+        r = _register(Client(), {"redirect_uris": [redirect_uri]})
+
+        assert r.status_code == 400
+        assert r.json()["error"] == "invalid_redirect_uri"
 
     def test_rejects_http_redirect(self):
         r = _register(Client(), {"redirect_uris": ["http://evil.example.com/cb"]})

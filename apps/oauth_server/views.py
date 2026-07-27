@@ -87,11 +87,27 @@ def _dcr_rate_limited(request) -> bool:
     return global_count > _DCR_GLOBAL_LIMIT
 
 
-def _is_https_uri(value) -> bool:
+def _is_allowed_redirect_uri(value) -> bool:
+    """Allow HTTPS callbacks and RFC 8252-style native-client loopbacks.
+
+    Codex starts an ephemeral local callback listener for MCP OAuth.  Native
+    clients are allowed to use plain HTTP only when the host is a literal
+    loopback (or ``localhost`` for client compatibility) and an explicit port
+    is present.  All non-loopback callbacks must remain HTTPS.
+    """
     if not isinstance(value, str):
         return False
     parsed = urlparse(value)
-    return parsed.scheme == "https" and bool(parsed.netloc)
+    if not parsed.netloc or parsed.fragment or parsed.username or parsed.password:
+        return False
+    if parsed.scheme == "https":
+        return True
+    if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "::1", "localhost"}:
+        return False
+    try:
+        return parsed.port is not None
+    except ValueError:
+        return False
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -124,10 +140,10 @@ class RegisterView(View):
             return _dcr_error("invalid_redirect_uri", "redirect_uris is required.")
         if len(redirect_uris) > _MAX_REDIRECT_URIS:
             return _dcr_error("invalid_redirect_uri", "Too many redirect_uris.")
-        if not all(_is_https_uri(u) for u in redirect_uris):
+        if not all(_is_allowed_redirect_uri(u) for u in redirect_uris):
             return _dcr_error(
                 "invalid_redirect_uri",
-                "Each redirect_uri must be an absolute https URL.",
+                "Each redirect_uri must use https or an http loopback host with an explicit port.",
             )
 
         grant_types = body.get("grant_types") or ["authorization_code"]
