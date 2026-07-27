@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 
 import pytest
+from django.conf import settings
 from django.test import Client
 
 REGISTER_URL = "/oauth/register"
@@ -110,6 +111,25 @@ class TestDiscoveryMetadata:
         # RFC 9728 path-scoped variant — what the WWW-Authenticate header points at.
         data = Client().get(PR_META_MCP_URL).json()
         assert data["resource"].endswith("/api/v1/mcp")
+
+
+class TestOAuthSecuritySettings:
+    def test_rfc9700_behavior_and_deploy_gates_are_enabled(self):
+        required_flags = {
+            "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT",
+            "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT",
+            "COMPLIANT_BCP_RFC9700_PKCE_METHOD",
+            "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT",
+            "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS",
+            "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE",
+            "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN",
+            "COMPLIANT_BCP_RFC9700_REDIRECT_URI_SCHEME",
+            "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING",
+            "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED",
+        }
+
+        assert settings.OAUTH2_PROVIDER["REFRESH_TOKEN_REUSE_PROTECTION"] is True
+        assert all(settings.OAUTH2_PROVIDER[flag] is True for flag in required_flags)
 
 
 class _FakeOAuthRequest:
