@@ -4,10 +4,78 @@ from unittest.mock import MagicMock, call
 from providers.exceptions import APIError
 from providers.instagram import InstagramProvider
 from providers.instagram_login import InstagramLoginProvider
+from providers.types import PostType, PublishContent
 
 
 def _resp(data):
     return MagicMock(json=MagicMock(return_value=data))
+
+
+def test_instagram_login_video_publishes_as_reel_with_cover_and_real_permalink():
+    provider = InstagramLoginProvider({"client_id": "id", "client_secret": "secret"})
+    provider._request = MagicMock(
+        side_effect=[
+            _resp({"id": "container-1"}),
+            _resp({"status_code": "FINISHED"}),
+            _resp({"id": "media-1"}),
+            _resp(
+                {
+                    "id": "media-1",
+                    "media_type": "VIDEO",
+                    "media_product_type": "REELS",
+                    "permalink": "https://www.instagram.com/reel/shortcode/",
+                    "timestamp": "2026-07-27T19:45:03+0000",
+                }
+            ),
+        ]
+    )
+
+    result = provider.publish_post(
+        "ig-token",
+        PublishContent(
+            text="Caption",
+            media_urls=["https://cdn.example.com/video.mp4"],
+            post_type=PostType.VIDEO,
+            extra={"cover_url": "https://cdn.example.com/cover.jpg"},
+        ),
+    )
+
+    assert result.platform_post_id == "media-1"
+    assert result.url == "https://www.instagram.com/reel/shortcode/"
+    assert result.extra["media"]["media_product_type"] == "REELS"
+    provider._request.assert_has_calls(
+        [
+            call(
+                "POST",
+                "https://graph.instagram.com/v25.0/me/media",
+                access_token="ig-token",
+                json={
+                    "caption": "Caption",
+                    "media_type": "REELS",
+                    "video_url": "https://cdn.example.com/video.mp4",
+                    "cover_url": "https://cdn.example.com/cover.jpg",
+                },
+            ),
+            call(
+                "GET",
+                "https://graph.instagram.com/v25.0/container-1",
+                access_token="ig-token",
+                params={"fields": "status_code,status"},
+            ),
+            call(
+                "POST",
+                "https://graph.instagram.com/v25.0/me/media_publish",
+                access_token="ig-token",
+                json={"creation_id": "container-1"},
+            ),
+            call(
+                "GET",
+                "https://graph.instagram.com/v25.0/media-1",
+                access_token="ig-token",
+                params={"fields": "id,media_type,media_product_type,permalink,timestamp"},
+            ),
+        ]
+    )
 
 
 def test_get_user_pages_returns_linked_instagram_business_accounts():

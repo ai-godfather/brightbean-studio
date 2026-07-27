@@ -431,6 +431,9 @@ class PublishEngine:
                 try:
                     cover_asset = MediaAsset.objects.get(id=cover_asset_id)
                     if cover_asset.file:
+                        cover_url = cover_asset.file.url
+                        if cover_url.startswith("/"):
+                            cover_url = f"{app_url}{cover_url}"
                         suffix = os.path.splitext(cover_asset.filename)[1] or ".jpg"
                         tmp = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)  # noqa: SIM115
                         temp_files.append(tmp.name)
@@ -439,6 +442,8 @@ class PublishEngine:
                                 tmp.write(chunk)
                         tmp.close()
                         extra["cover_image_file"] = tmp.name
+                        if platform in ("instagram", "instagram_login"):
+                            extra["cover_url"] = cover_url
                 except MediaAsset.DoesNotExist:
                     logger.warning("Cover image asset %s not found", cover_asset_id)
 
@@ -508,6 +513,12 @@ class PublishEngine:
         # 2. Platform defaults
         if platform == "pinterest":
             return PostType.PIN
+        if (
+            media_count == 1
+            and platform in ("instagram", "instagram_login")
+            and first_media_type == "video"
+        ):
+            return PostType.REEL
 
         # 3. Multi-media → CAROUSEL for Instagram/Threads
         if media_count > 1 and platform in (

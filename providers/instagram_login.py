@@ -110,7 +110,13 @@ class InstagramLoginProvider(SocialProvider):
 
     @property
     def supported_post_types(self) -> list[PostType]:
-        return [PostType.IMAGE, PostType.CAROUSEL, PostType.REEL, PostType.STORY]
+        return [
+            PostType.IMAGE,
+            PostType.CAROUSEL,
+            PostType.REEL,
+            PostType.VIDEO,
+            PostType.STORY,
+        ]
 
     @property
     def supported_media_types(self) -> list[MediaType]:
@@ -300,9 +306,16 @@ class InstagramLoginProvider(SocialProvider):
         if content.text:
             payload["caption"] = content.text
 
-        if content.post_type == PostType.REEL:
+        if content.post_type in (PostType.REEL, PostType.VIDEO):
+            # Instagram publishes a single feed video as a Reel. The
+            # publisher engine resolves an unhinted video attachment to
+            # PostType.VIDEO, so handle both enum values explicitly instead
+            # of ever passing an .mp4 as image_url.
             payload["media_type"] = "REELS"
             payload["video_url"] = content.media_urls[0]
+            cover_url = content.extra.get("cover_url")
+            if cover_url:
+                payload["cover_url"] = cover_url
         elif content.post_type == PostType.STORY:
             url = content.media_urls[0]
             payload["media_type"] = "STORIES"
@@ -399,10 +412,33 @@ class InstagramLoginProvider(SocialProvider):
         )
         data = resp.json()
         media_id = data.get("id", "")
+        media_fields: dict = {}
+        if media_id:
+            try:
+                media_resp = self._request(
+                    "GET",
+                    f"{API_BASE}/{media_id}",
+                    access_token=access_token,
+                    params={"fields": "id,media_type,media_product_type,permalink,timestamp"},
+                )
+                media_fields = media_resp.json()
+            except APIError:
+                # The publish has already succeeded. Do not turn an
+                # immediately-consistent metadata lookup into a false failed
+                # publication; retain the platform id for later verification.
+                logger.warning(
+                    "Instagram media %s published but metadata lookup failed",
+                    media_id,
+                    exc_info=True,
+                )
+
+        extra = dict(data)
+        if media_fields:
+            extra["media"] = media_fields
         return PublishResult(
             platform_post_id=media_id,
-            url=f"https://www.instagram.com/p/{media_id}/",
-            extra=data,
+            url=media_fields.get("permalink") or f"https://www.instagram.com/p/{media_id}/",
+            extra=extra,
         )
 
     # ------------------------------------------------------------------
