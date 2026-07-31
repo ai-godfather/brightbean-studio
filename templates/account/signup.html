@@ -45,7 +45,7 @@
         {% endif %}
 
         <!-- Social Signup -->
-        {% if SOCIALACCOUNT_ENABLED %}
+        {% if SOCIALACCOUNT_ENABLED and GOOGLE_AUTH_ENABLED %}
             {% get_providers as socialaccount_providers %}
             {% if socialaccount_providers %}
                 <div class="space-y-3 mb-6">
