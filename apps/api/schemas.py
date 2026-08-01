@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import datetime as dt
 import uuid
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from ninja import Field, Schema
 from pydantic import field_serializer
@@ -250,6 +250,7 @@ class PlatformPostSummary(Schema):
     published_at: dt.datetime | None
     platform_post_id: str = ""
     publish_error: str = ""
+    platform_extra: dict[str, Any]
 
     @field_serializer("scheduled_at", "published_at")
     def _serialize_dt(self, value: dt.datetime | None) -> str | None:
@@ -266,6 +267,7 @@ class PlatformPostSummary(Schema):
             published_at=pp.published_at,
             platform_post_id=pp.platform_post_id or "",
             publish_error=pp.publish_error or "",
+            platform_extra=pp.platform_extra or {},
         )
 
 

@@ -18,7 +18,11 @@ Large video uploads over MCP require `STORAGE_BACKEND=s3`. The MCP flow is:
 2. Submit the returned fields and binary file to the returned presigned URL.
 3. Call `finalize_media_upload`.
 4. Poll `get_media` until processing is complete.
-5. Create a draft, review it, and only then schedule the post.
+5. For a Reel, call `create_draft` with `post_type: "reel"` and, when a
+   custom cover is used, `cover_image_asset_id: "<completed-image-asset-id>"`.
+   Both fields are persisted in `PlatformPost.platform_extra` and returned by
+   `create_draft` / `get_post` for verification.
+6. Review the draft and only then schedule the post.
 
 ## Deploy
 
