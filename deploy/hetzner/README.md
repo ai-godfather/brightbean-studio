@@ -39,6 +39,20 @@ Add both routes from `Caddyfile.shopauth.snippet` to ShopAuth's Caddyfile,
 validate it, and reload Caddy. `X-Forwarded-Proto` must be `https`, otherwise
 Django's production SSL redirect loops behind Cloudflare Flexible.
 
+Because ShopAuth recreates the shared Caddy container from its own deployment
+tree, install BrightBean's independent route reconciler once on the host:
+
+```bash
+sudo deploy/hetzner/install-caddy-route-keeper.sh
+```
+
+The BrightBean-owned systemd path unit repairs the route immediately after the
+shared Caddyfile changes, while a 60-second timer covers missed file events. The
+repair is idempotent and fail-closed: it first builds a candidate, validates it
+with Caddy, saves the previous file under `/var/backups/brightbean-caddy/`, and
+recreates only the Caddy container. It never builds, migrates, tests, or restarts
+the ShopAuth application services.
+
 ## Codex MCP
 
 After the web app has a user and an Instagram account is connected:
