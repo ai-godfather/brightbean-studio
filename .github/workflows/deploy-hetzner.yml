@@ -1,0 +1,72 @@
+name: Deploy Hetzner
+
+on:
+  workflow_dispatch:
+    inputs:
+      full_rebuild:
+        description: Rebuild the BrightBean image before deployment
+        type: boolean
+        default: true
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-brightbean-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy BrightBean to Hetzner
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    steps:
+      - name: Resolve revision
+        id: revision
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            revision="$WORKFLOW_RUN_SHA"
+          else
+            revision="$DISPATCH_SHA"
+          fi
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout verified revision
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ steps.revision.outputs.revision }}
+          persist-credentials: false
+
+      - name: Configure SSH
+        env:
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+        run: |
+          set -euo pipefail
+          test -n "$PROD_SSH_PRIVATE_KEY"
+          test -n "$PROD_SERVER_IP"
+          install -d -m 0700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 0600 ~/.ssh/id_ed25519
+
+      - name: Deploy independent BrightBean stack
+        env:
+          PROD_SERVER_IP: ${{ secrets.PROD_SERVER_IP }}
+          PROD_SSH_USER: ${{ vars.PROD_SSH_USER || 'root' }}
+          GITHUB_SHA: ${{ steps.revision.outputs.revision }}
+          COMPOSE_BUILD: ${{ (github.event_name == 'workflow_run' || inputs.full_rebuild) && '1' || '0' }}
+        run: deploy/hetzner/deploy-ci.sh

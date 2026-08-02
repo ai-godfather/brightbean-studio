@@ -393,3 +393,38 @@ class PublishedPostLeavesQueueTest(TestCase):
         self.assertEqual(self.pp.status, PlatformPost.Status.PUBLISHED)
         self.assertEqual(self.pp.retry_count, 0)
         self.assertIsNone(self.pp.next_retry_at)
+
+
+class ResolvePostTypeTest(SimpleTestCase):
+    def test_instagram_direct_single_video_defaults_to_reel(self):
+        self.assertEqual(
+            PublishEngine._resolve_post_type(
+                platform="instagram_login",
+                platform_extra={},
+                media_count=1,
+                first_media_type="video",
+            ),
+            PostType.REEL,
+        )
+
+    def test_explicit_instagram_story_hint_wins_over_video_default(self):
+        self.assertEqual(
+            PublishEngine._resolve_post_type(
+                platform="instagram_login",
+                platform_extra={"post_type": "story"},
+                media_count=1,
+                first_media_type="video",
+            ),
+            PostType.STORY,
+        )
+
+    def test_instagram_multiple_assets_still_resolve_to_carousel(self):
+        self.assertEqual(
+            PublishEngine._resolve_post_type(
+                platform="instagram_login",
+                platform_extra={},
+                media_count=2,
+                first_media_type="video",
+            ),
+            PostType.CAROUSEL,
+        )

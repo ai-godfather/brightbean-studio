@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch the shared Caddyfile for BrightBean route removal
+
+[Path]
+PathChanged=/opt/shopauth/infra/production/Caddyfile
+Unit=brightbean-caddy-route.service
+
+[Install]
+WantedBy=multi-user.target

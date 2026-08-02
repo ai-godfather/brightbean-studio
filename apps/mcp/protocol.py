@@ -33,6 +33,13 @@ MCP_PROTOCOL_VERSION = "2025-03-26"
 SERVER_NAME = "brightbean-studio"
 SERVER_VERSION = "1.0.0"
 
+SERVER_INSTRUCTIONS = (
+    "For media publishing, use request_media_upload for files larger than 1 MB, upload to the returned presigned "
+    "URL, call finalize_media_upload, and poll get_media until processing_status is completed. Create a draft for "
+    "review before scheduling. Never schedule or publish until the user has confirmed the final media, caption, "
+    "target accounts, and publication time. Use upload_media only for files up to 1 MB."
+)
+
 
 # ---------------------------------------------------------------------------
 # Error codes

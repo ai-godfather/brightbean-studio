@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 
 import pytest
+from django.conf import settings
 from django.test import Client
 
 REGISTER_URL = "/oauth/register"
@@ -16,6 +17,11 @@ AS_META_URL = "/.well-known/oauth-authorization-server"
 PR_META_URL = "/.well-known/oauth-protected-resource"
 PR_META_MCP_URL = "/.well-known/oauth-protected-resource/api/v1/mcp"
 CLAUDE_REDIRECT = "https://claude.ai/api/mcp/auth_callback"
+CODEX_LOOPBACK_REDIRECTS = (
+    "http://127.0.0.1:45123/callback",
+    "http://localhost:45123/callback",
+    "http://[::1]:45123/callback",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -54,6 +60,31 @@ class TestDynamicClientRegistration:
         app = get_application_model().objects.get(client_id=data["client_id"])
         assert app.client_type == app.CLIENT_PUBLIC
         assert app.authorization_grant_type == app.GRANT_AUTHORIZATION_CODE
+
+    @pytest.mark.parametrize("redirect_uri", CODEX_LOOPBACK_REDIRECTS)
+    def test_registers_native_client_with_http_loopback_redirect(self, redirect_uri):
+        r = _register(
+            Client(),
+            {"client_name": "Codex", "redirect_uris": [redirect_uri], "token_endpoint_auth_method": "none"},
+        )
+
+        assert r.status_code == 201
+        assert r.json()["redirect_uris"] == [redirect_uri]
+
+    @pytest.mark.parametrize(
+        "redirect_uri",
+        (
+            "http://localhost/callback",
+            "http://user@localhost:45123/callback",
+            "http://localhost.evil.example:45123/callback",
+            "http://127.0.0.1.evil.example:45123/callback",
+        ),
+    )
+    def test_rejects_unsafe_http_loopback_lookalikes(self, redirect_uri):
+        r = _register(Client(), {"redirect_uris": [redirect_uri]})
+
+        assert r.status_code == 400
+        assert r.json()["error"] == "invalid_redirect_uri"
 
     def test_rejects_http_redirect(self):
         r = _register(Client(), {"redirect_uris": ["http://evil.example.com/cb"]})
@@ -110,6 +141,93 @@ class TestDiscoveryMetadata:
         # RFC 9728 path-scoped variant — what the WWW-Authenticate header points at.
         data = Client().get(PR_META_MCP_URL).json()
         assert data["resource"].endswith("/api/v1/mcp")
+
+
+class TestOAuthSecuritySettings:
+    def test_rfc9700_behavior_and_deploy_gates_are_enabled(self):
+        required_flags = {
+            "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT",
+            "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT",
+            "COMPLIANT_BCP_RFC9700_PKCE_METHOD",
+            "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT",
+            "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS",
+            "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE",
+            "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN",
+            "COMPLIANT_BCP_RFC9700_REDIRECT_URI_SCHEME",
+            "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING",
+            "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED",
+        }
+
+        assert settings.OAUTH2_PROVIDER["REFRESH_TOKEN_REUSE_PROTECTION"] is True
+        assert all(settings.OAUTH2_PROVIDER[flag] is True for flag in required_flags)
+
+
+@pytest.mark.django_db
+class TestAuthorizationResponseRedirects:
+    @pytest.mark.parametrize("redirect_uri", CODEX_LOOPBACK_REDIRECTS)
+    def test_allows_native_loopback_after_consent(self, redirect_uri):
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Codex",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris=redirect_uri,
+        )
+
+        response = NativeLoopbackAuthorizationView().redirect(
+            f"{redirect_uri}?code=authorization-code&state=state",
+            application,
+        )
+
+        assert response.status_code == 302
+        assert response["Location"].startswith(redirect_uri)
+
+    def test_rejects_non_loopback_http_after_consent(self):
+        from django.core.exceptions import DisallowedRedirect
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Unsafe client",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="http://evil.example.com/callback",
+        )
+
+        with pytest.raises(DisallowedRedirect):
+            NativeLoopbackAuthorizationView().redirect(
+                "http://evil.example.com/callback?code=authorization-code",
+                application,
+            )
+
+    def test_rejects_unregistered_loopback_after_consent(self):
+        from django.core.exceptions import DisallowedRedirect
+        from oauth2_provider.models import get_application_model
+
+        from apps.oauth_server.views import NativeLoopbackAuthorizationView
+
+        application_model = get_application_model()
+        application = application_model.objects.create(
+            name="Codex",
+            client_type=application_model.CLIENT_PUBLIC,
+            authorization_grant_type=application_model.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="http://127.0.0.1:45123/callback",
+        )
+
+        with pytest.raises(DisallowedRedirect):
+            NativeLoopbackAuthorizationView().redirect(
+                "http://127.0.0.1:45124/callback?code=authorization-code",
+                application,
+            )
+
+    def test_global_redirect_schemes_remain_https_only(self):
+        assert settings.OAUTH2_PROVIDER["ALLOWED_REDIRECT_URI_SCHEMES"] == ["https"]
 
 
 class _FakeOAuthRequest:

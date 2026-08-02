@@ -26,6 +26,7 @@ from apps.mcp.protocol import (
     INVALID_REQUEST,
     MCP_PROTOCOL_VERSION,
     PARSE_ERROR,
+    SERVER_INSTRUCTIONS,
     SERVER_NAME,
     SERVER_VERSION,
     JsonRpcError,
@@ -57,6 +58,7 @@ def _initialize(params: dict, context: dict[str, Any]) -> dict:
             "tools": {"listChanged": False},
         },
         "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+        "instructions": SERVER_INSTRUCTIONS,
     }
 
 

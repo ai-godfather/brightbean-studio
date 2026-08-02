@@ -25,6 +25,9 @@ EXEMPT_PATH_PREFIXES = (
     "/health/",
     "/static/",
     "/admin/",
+    "/privacy/",
+    "/terms/",
+    "/data-deletion/",
 )
 
 

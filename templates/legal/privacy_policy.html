@@ -1,0 +1,161 @@
+{% extends "legal/base.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+{% block meta_description %}How BrightBean Social Studio collects, uses, stores, and deletes personal data and connected social-platform data.{% endblock %}
+{% block heading %}Privacy Policy{% endblock %}
+
+{% block content %}
+<p class="summary">
+    This policy explains how ShopAuth Cloud, the operator of this BrightBean Social Studio deployment
+    (“BrightBean Studio”, “we”, “us”), handles personal data when you use
+    <strong>studio.shopauth.cloud</strong>, connect social-media accounts, publish content, or use
+    messaging and analytics features. We do not sell personal data.
+</p>
+
+<h2>1. Who controls your data</h2>
+<p>
+    The data controller for this deployment is ShopAuth Cloud, the operator of BrightBean Studio.
+    Privacy and data-protection requests can be sent to
+    <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>.
+</p>
+
+<h2>2. Data we collect</h2>
+<h3>Account and workspace data</h3>
+<ul>
+    <li>Your email address, display name, profile image, authentication records, and account preferences.</li>
+    <li>Organizations, workspaces, team memberships, roles, approval records, and audit history.</li>
+    <li>Security and technical data such as IP address, browser information, timestamps, logs, and error reports.</li>
+</ul>
+
+<h3>Connected social-platform data</h3>
+<p>
+    When you connect Instagram, Facebook, or another supported platform, we receive only the data
+    permitted by the scopes you approve and made available by that platform’s API. Depending on the
+    features you enable, this may include:
+</p>
+<ul>
+    <li>Account and professional-profile identifiers, username, profile image, and account metadata.</li>
+    <li>OAuth access and refresh tokens needed to act on the connected account.</li>
+    <li>Posts, Reels, media metadata, captions, publishing status, and performance insights.</li>
+    <li>Comments, mentions, conversations, messages, sender identifiers, and webhook events.</li>
+    <li>Page or business-account relationships required to identify assets you manage.</li>
+</ul>
+<p>
+    BrightBean Studio does not ask for your Instagram or Facebook password. Authentication takes
+    place on the platform’s own authorization screen.
+</p>
+
+<h3>Content you provide</h3>
+<p>
+    We process drafts, captions, uploaded images and videos, schedules, content ideas, approval
+    comments, automation rules, and other materials you submit. If you enable AI-assisted features,
+    the relevant prompt and content may be sent to the AI provider configured for your workspace.
+</p>
+
+<h2>3. Why we use data</h2>
+<ul>
+    <li>To create and secure your account and provide workspaces and collaboration features.</li>
+    <li>To connect social accounts and perform actions you request, including publishing, scheduling, analytics, comment moderation, and messaging.</li>
+    <li>To receive webhook events and run automation rules configured by authorized users.</li>
+    <li>To provide support, detect abuse, troubleshoot errors, and protect the service.</li>
+    <li>To meet legal obligations and enforce our Terms of Service.</li>
+</ul>
+<p>
+    Where the GDPR applies, our legal bases are performance of our contract with you, your consent
+    for optional integrations, our legitimate interests in operating and securing the service, and
+    compliance with legal obligations. You can withdraw an integration permission by disconnecting
+    the account or revoking access on the social platform.
+</p>
+
+<h2>4. How we share data</h2>
+<p>We disclose data only where necessary to operate the service:</p>
+<ul>
+    <li>
+        <strong>Connected platforms.</strong> We send content and instructions to Meta, Instagram,
+        Facebook, and other platforms only when you request or schedule an action.
+    </li>
+    <li>
+        <strong>Infrastructure providers.</strong> Hosting, storage, network, security, email, and
+        monitoring providers process limited data on our behalf, including Hetzner and Cloudflare
+        for this deployment.
+    </li>
+    <li>
+        <strong>Configured service providers.</strong> AI or media-processing providers receive only
+        the content needed for a feature you choose to use.
+    </li>
+    <li>
+        <strong>Legal and safety reasons.</strong> We may disclose data when required by law or
+        necessary to protect users, the public, our rights, or the security of the service.
+    </li>
+</ul>
+<p>We do not sell or rent personal data and do not use private messages for advertising.</p>
+
+<h2>5. Meta and Instagram Platform Data</h2>
+<p>
+    Data received from Meta products is used only to provide user-facing functionality authorized
+    by the connected account, such as publishing content, displaying analytics, managing comments,
+    and handling messages. Our use and transfer of that data is subject to the applicable Meta
+    Platform Terms and Developer Policies. Access is limited to authorized workspace members and
+    service components that need it.
+</p>
+
+<h2>6. Retention and deletion</h2>
+<p>
+    We keep account and workspace data while your account is active or as needed to provide the
+    service. When you disconnect a social account, its active authorization is removed and the
+    service stops requesting new platform data for that account. Valid account-deletion requests are
+    completed within 30 days unless data must be retained for fraud prevention, security, dispute
+    resolution, or a legal obligation.
+</p>
+<p>
+    Limited security logs and encrypted backups may remain for up to 90 days before automatic
+    rotation. Data retained for legal or security purposes is isolated from normal product use.
+    Detailed deletion instructions are available on our
+    <a href="{% url 'data_deletion' %}">Data Deletion page</a>.
+</p>
+
+<h2>7. Security</h2>
+<p>
+    We use access controls, encrypted transport, restricted administrative access, credential
+    protection, backups, logging, and other technical and organizational safeguards appropriate to
+    the sensitivity of the data. No online service can guarantee absolute security; please notify us
+    immediately if you suspect unauthorized access.
+</p>
+
+<h2>8. International transfers</h2>
+<p>
+    Service providers or connected platforms may process data outside your country. Where required,
+    we rely on lawful transfer mechanisms and contractual safeguards. Each connected platform also
+    processes data under its own privacy policy.
+</p>
+
+<h2>9. Your rights</h2>
+<p>
+    Depending on your location, you may have rights to access, correct, export, restrict, object to,
+    or delete personal data, and to withdraw consent. You may also complain to your local data
+    protection authority. We may ask you to verify your identity before completing a request.
+</p>
+
+<h2>10. Children</h2>
+<p>
+    BrightBean Studio is a business service and is not directed to children under 16. We do not
+    knowingly collect personal data from children.
+</p>
+
+<h2>11. Changes to this policy</h2>
+<p>
+    We may update this policy as the service or legal requirements change. Material changes will be
+    announced in the service or by another reasonable method. The effective date above identifies
+    the current version.
+</p>
+
+<div class="contact-card">
+    <h2>Contact</h2>
+    <p>
+        For privacy questions or data requests, email
+        <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>.
+        Include the email address used for your BrightBean Studio account and, if relevant, the
+        connected social-account username. Never send us a social-platform password or access token.
+    </p>
+</div>
+{% endblock %}

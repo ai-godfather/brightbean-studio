@@ -302,6 +302,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 | **Heroku** | `Procfile` + `app.json` | Deploy-button ready. Must use Basic+ dynos (Eco dynos break the worker). |
 | **Railway** | `railway.toml` | The [one-click template](https://railway.com/deploy/brightbean-studio) provisions three services: web (Gunicorn, runs `migrate` on startup), worker (`python manage.py process_tasks`), and managed PostgreSQL. The web service's startup `migrate` fires the `post_migrate` hooks that register the recurring tasks, so scheduling works out of the box. |
 | **Render** | `render.yaml` | Blueprint with web, worker, PostgreSQL. Must use paid tier. |
+| **Hetzner next to ShopAuth** | `deploy/hetzner/docker-compose.yml` | Isolated stack that reuses an existing Caddy network without binding public ports. See [`deploy/hetzner/README.md`](deploy/hetzner/README.md). |
 
 All platforms with ephemeral filesystems require `STORAGE_BACKEND=s3` - see `.env.example` for S3 configuration.
 

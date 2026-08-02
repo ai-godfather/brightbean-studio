@@ -1,0 +1,17 @@
+# Add this site block alongside the existing ShopAuth sites. Cloudflare uses
+# Flexible mode, so the origin receives HTTP while Django must still see the
+# original public scheme as HTTPS.
+studio.shopauth.cloud {
+  encode gzip zstd
+  reverse_proxy brightbean-app:8000 {
+    header_up X-Forwarded-Proto https
+  }
+}
+
+# Add this matcher inside the existing `:80` site, before its final fallback.
+@brightbean host studio.shopauth.cloud
+handle @brightbean {
+  reverse_proxy brightbean-app:8000 {
+    header_up X-Forwarded-Proto https
+  }
+}

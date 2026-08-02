@@ -29,6 +29,9 @@ from apps.composer.services import create_post, transition_platform_post
 from apps.mcp.protocol import INVALID_PARAMS, JsonRpcError
 from apps.mcp.tools import Tool, register_tool
 from apps.social_accounts.models import SocialAccount
+from providers.types import PostType
+
+_POST_TYPE_VALUES = [post_type.value for post_type in PostType]
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -166,6 +169,43 @@ def _parse_iso_datetime(value: Any, field_name: str) -> datetime:
     return parsed
 
 
+def _reel_platform_extra(args: dict, api_key, social_account: SocialAccount) -> dict[str, str]:
+    """Validate MCP Reel hints and persist only the supported platform extras."""
+    extra: dict[str, str] = {}
+    post_type = args.get("post_type")
+    if post_type is not None:
+        if post_type not in _POST_TYPE_VALUES:
+            raise JsonRpcError(INVALID_PARAMS, f"post_type must be one of {_POST_TYPE_VALUES}")
+        if post_type == PostType.REEL.value and social_account.platform not in ("instagram", "instagram_login"):
+            raise JsonRpcError(INVALID_PARAMS, "post_type=reel is only valid for an Instagram account")
+        extra["post_type"] = post_type
+
+    cover_id_raw = args.get("cover_image_asset_id")
+    if cover_id_raw is not None:
+        if social_account.platform not in ("instagram", "instagram_login", "pinterest"):
+            raise JsonRpcError(
+                INVALID_PARAMS,
+                "cover_image_asset_id is only supported for Instagram and Pinterest accounts",
+            )
+        cover_id = _parse_uuid(cover_id_raw, "cover_image_asset_id")
+        from apps.media_library.models import MediaAsset
+
+        try:
+            cover = _visible_media_qs(api_key).get(
+                id=cover_id,
+                media_type=MediaAsset.MediaType.IMAGE,
+                processing_status=MediaAsset.ProcessingStatus.COMPLETED,
+            )
+        except MediaAsset.DoesNotExist as exc:
+            raise JsonRpcError(
+                INVALID_PARAMS,
+                "cover_image_asset_id must reference a completed image visible to this workspace",
+            ) from exc
+        extra["cover_image_asset_id"] = str(cover.id)
+
+    return extra
+
+
 # ---------------------------------------------------------------------------
 # Tool: list_accounts
 # ---------------------------------------------------------------------------
@@ -208,6 +248,7 @@ def _create_draft(args: dict, context: dict[str, Any]) -> dict:
     if "caption" not in args:
         raise JsonRpcError(INVALID_PARAMS, "caption is required")
     sa = _resolve_allowed_account(api_key, args["social_account_id"])
+    platform_extra = _reel_platform_extra(args, api_key, sa)
     proposed_publish_at = None
     if args.get("proposed_publish_at") is not None:
         proposed_publish_at = _parse_iso_datetime(args["proposed_publish_at"], "proposed_publish_at")
@@ -221,6 +262,7 @@ def _create_draft(args: dict, context: dict[str, Any]) -> dict:
             internal_notes=args.get("internal_notes", ""),
             media_asset_ids=args.get("media_asset_ids") or [],
             proposed_publish_at=proposed_publish_at,
+            platform_overrides={sa.id: {"platform_extra": platform_extra}},
             author=api_key.issued_by if api_key.issued_by_id else None,
             status="draft",
         )
@@ -272,6 +314,16 @@ register_tool(
                         "not validated against the future, and never queued for publishing."
                     ),
                 },
+                "post_type": {
+                    "type": "string",
+                    "enum": _POST_TYPE_VALUES,
+                    "description": "Explicit provider post type. Use 'reel' for a single Instagram Reel video.",
+                },
+                "cover_image_asset_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Completed image MediaAsset UUID to use as the Reel cover.",
+                },
             },
             "required": ["social_account_id", "caption"],
             "additionalProperties": False,
@@ -302,6 +354,7 @@ def _schedule_post(args: dict, context: dict[str, Any]) -> dict:
         raise JsonRpcError(INVALID_PARAMS, "scheduled_at is required (ISO 8601)")
     scheduled_at = _parse_iso_datetime(args["scheduled_at"], "scheduled_at")
     sa = _resolve_allowed_account(api_key, args["social_account_id"])
+    platform_extra = _reel_platform_extra(args, api_key, sa)
     # Platform quota is shared with REST; ``check_platform_quota``
     # raises ``HttpError(429,...)`` which we re-shape into a JSON-RPC
     # error so MCP clients see structured feedback rather than HTTP.
@@ -322,6 +375,7 @@ def _schedule_post(args: dict, context: dict[str, Any]) -> dict:
             internal_notes=args.get("internal_notes", ""),
             media_asset_ids=args.get("media_asset_ids") or [],
             scheduled_at=scheduled_at,
+            platform_overrides={sa.id: {"platform_extra": platform_extra}},
             author=api_key.issued_by if api_key.issued_by_id else None,
             status="scheduled",
         )
@@ -358,6 +412,16 @@ register_tool(
                     "type": "array",
                     "items": {"type": "string", "format": "uuid"},
                     "default": [],
+                },
+                "post_type": {
+                    "type": "string",
+                    "enum": _POST_TYPE_VALUES,
+                    "description": "Explicit provider post type. Use 'reel' for a single Instagram Reel video.",
+                },
+                "cover_image_asset_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Completed image MediaAsset UUID to use as the Reel cover.",
                 },
             },
             "required": ["social_account_id", "caption", "scheduled_at"],
@@ -679,7 +743,7 @@ register_tool(
 
 
 def _upload_media(args: dict, context: dict[str, Any]) -> dict:
-    """MCP-side upload accepts base64 content (≤5 MB).
+    """MCP-side upload accepts base64 content (≤1 MB).
 
     For larger files agents must use ``POST /api/v1/media/`` over REST —
     multipart can't ride a JSON-RPC envelope cleanly.
@@ -767,7 +831,7 @@ register_tool(
                 "filename": {"type": "string", "maxLength": 255},
                 "content_base64": {
                     "type": "string",
-                    "description": "Base64-encoded file content. Decoded size must be ≤5 MB.",
+                    "description": "Base64-encoded file content. Decoded size must be ≤1 MB.",
                 },
                 "content_type": {"type": "string"},
                 "alt_text": {"type": "string", "maxLength": 2000},

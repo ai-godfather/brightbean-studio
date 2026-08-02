@@ -14,13 +14,14 @@ from . import views
 app_name = "oauth2_provider"
 
 # The consent form POSTs to /oauth/authorize/ ('self'), then 302-redirects to the
-# client's redirect_uri (Claude: https://claude.ai|claude.com/api/mcp/auth_callback).
+# client's redirect_uri (Claude: https://claude.ai|claude.com/api/mcp/auth_callback;
+# native Codex: an ephemeral http://127.0.0.1:<port> callback).
 # Chromium enforces form-action across the whole redirect chain, so the redirect
 # target must be allowlisted on the consent page or the flow dies silently there.
 # csp_update appends to the global CSP_FORM_ACTION, scoping the relaxation here only.
-authorize_view = csp_update(FORM_ACTION="https://claude.ai https://claude.com")(
-    oauth2_views.AuthorizationView.as_view()
-)
+authorize_view = csp_update(
+    FORM_ACTION=("https://claude.ai https://claude.com http://127.0.0.1:* http://localhost:* http://[::1]:*")
+)(views.NativeLoopbackAuthorizationView.as_view())
 
 urlpatterns = [
     path("authorize/", authorize_view, name="authorize"),

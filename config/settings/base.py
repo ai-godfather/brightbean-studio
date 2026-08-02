@@ -111,6 +111,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.common.context_processors.authentication_context",
                 "apps.notifications.context_processors.unread_notification_count",
                 "apps.common.context_processors.sidebar_context",
                 "apps.onboarding.context_processors.onboarding_checklist",
@@ -482,6 +483,22 @@ OAUTH2_PROVIDER = {
     "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 60 * 60,
     "AUTHORIZATION_CODE_EXPIRE_SECONDS": 600,
     "ROTATE_REFRESH_TOKEN": True,
+    "REFRESH_TOKEN_REUSE_PROTECTION": True,
+    # Adopt django-oauth-toolkit's RFC 9700 security behavior now instead of
+    # retaining its compatibility defaults until the 4.0 release.  The MCP
+    # connector only supports authorization-code + S256 PKCE, so the implicit
+    # and password grants, query-string bearer tokens, and plain token storage
+    # are unnecessary attack surface.
+    "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,
+    "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,
+    "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,
+    "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,
+    "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_SCHEME": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": True,
     "REQUEST_APPROVAL_PROMPT": "auto",
     # Claude's OAuth callback is always https; reject non-TLS redirect URIs.
     "ALLOWED_REDIRECT_URI_SCHEMES": ["https"],

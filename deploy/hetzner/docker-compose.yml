@@ -1,0 +1,96 @@
+name: brightbean-production
+
+x-app: &app
+  build:
+    context: ../..
+    dockerfile: Dockerfile
+  image: brightbean-studio:${BRIGHTBEAN_IMAGE_TAG:-local}
+  env_file:
+    - ${BRIGHTBEAN_ENV_FILE:-.env}
+  environment:
+    DJANGO_SETTINGS_MODULE: config.settings.production
+    DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-brightbean}
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  restart: unless-stopped
+
+services:
+  migrate:
+    <<: *app
+    command: python manage.py migrate --noinput
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - default
+
+  app:
+    <<: *app
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --timeout 180
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--header",
+          "Host: studio.shopauth.cloud",
+          "http://localhost:8000/health/",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    cpus: 1.0
+    mem_limit: 1g
+    pids_limit: 256
+    networks:
+      default:
+      shopauth:
+        aliases:
+          - brightbean-app
+
+  worker:
+    <<: *app
+    command: python manage.py process_tasks
+    cpus: 1.5
+    mem_limit: 2g
+    pids_limit: 256
+    networks:
+      - default
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-brightbean}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    cpus: 0.75
+    mem_limit: 1g
+    pids_limit: 128
+    networks:
+      - default
+
+networks:
+  default:
+    name: brightbean-production
+  shopauth:
+    external: true
+    name: ${SHOPAUTH_NETWORK:-shopauth-production_default}
+
+volumes:
+  postgres_data:
+    name: brightbean-production-postgres

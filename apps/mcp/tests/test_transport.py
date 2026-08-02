@@ -209,6 +209,8 @@ class TestProtocolMechanics:
         assert status == 200
         result = body["result"]
         assert result["serverInfo"]["name"] == "brightbean-studio"
+        assert "request_media_upload" in result["instructions"]
+        assert "confirmed" in result["instructions"]
         assert "protocolVersion" in result
         assert "tools" in result["capabilities"]
 
@@ -261,6 +263,26 @@ class TestToolsList:
         status, body = _post(client_with_token, _rpc("tools/list"))
         for t in body["result"]["tools"]:
             assert t["inputSchema"]["type"] == "object"
+
+    def test_reel_fields_are_advertised_on_draft_and_schedule_tools(self, client_with_token):
+        _status, body = _post(client_with_token, _rpc("tools/list"))
+        tools = {tool["name"]: tool for tool in body["result"]["tools"]}
+        for tool_name in ("create_draft", "schedule_post"):
+            properties = tools[tool_name]["inputSchema"]["properties"]
+            assert properties["post_type"]["enum"] == [
+                "text",
+                "image",
+                "video",
+                "carousel",
+                "story",
+                "reel",
+                "link",
+                "article",
+                "poll",
+                "pin",
+                "short",
+            ]
+            assert properties["cover_image_asset_id"]["format"] == "uuid"
 
     def test_unknown_tool_call_returns_invalid_params(self, client_with_token):
         status, body = _post(
@@ -322,6 +344,109 @@ class TestCreateDraftTool:
         # And the row really exists in the DB.
         assert Post.objects.count() == 1
         assert PlatformPost.objects.filter(status="draft").count() == 1
+
+    def test_reel_fields_round_trip_into_platform_extra(
+        self, client_with_token, social_account, workspace, organization
+    ):
+        from apps.media_library.models import MediaAsset
+
+        social_account.platform = "instagram_login"
+        social_account.save(update_fields=["platform"])
+        cover = MediaAsset.objects.create(
+            organization=organization,
+            workspace=workspace,
+            file="media_library/cover.jpg",
+            filename="cover.jpg",
+            media_type=MediaAsset.MediaType.IMAGE,
+            mime_type="image/jpeg",
+            processing_status=MediaAsset.ProcessingStatus.COMPLETED,
+            width=1080,
+            height=1920,
+        )
+
+        status, body = _post(
+            client_with_token,
+            _rpc(
+                "tools/call",
+                {
+                    "name": "create_draft",
+                    "arguments": {
+                        "social_account_id": str(social_account.id),
+                        "caption": "reel with a custom cover",
+                        "post_type": "reel",
+                        "cover_image_asset_id": str(cover.id),
+                    },
+                },
+            ),
+        )
+
+        assert status == 200
+        assert "error" not in body, body
+        inner = json.loads(body["result"]["content"][0]["text"])
+        assert inner["platform_posts"][0]["platform_extra"] == {
+            "post_type": "reel",
+            "cover_image_asset_id": str(cover.id),
+        }
+        assert PlatformPost.objects.get().platform_extra == inner["platform_posts"][0]["platform_extra"]
+
+    def test_reel_post_type_rejects_non_instagram_account(self, client_with_token, social_account):
+        _status, body = _post(
+            client_with_token,
+            _rpc(
+                "tools/call",
+                {
+                    "name": "create_draft",
+                    "arguments": {
+                        "social_account_id": str(social_account.id),
+                        "caption": "not an Instagram account",
+                        "post_type": "reel",
+                    },
+                },
+            ),
+        )
+
+        assert body["error"]["code"] == INVALID_PARAMS
+        assert "instagram" in body["error"]["message"].lower()
+        assert Post.objects.count() == 0
+
+    def test_reel_cover_must_be_a_completed_visible_image(
+        self, client_with_token, social_account, workspace, organization
+    ):
+        from apps.media_library.models import MediaAsset
+
+        social_account.platform = "instagram_login"
+        social_account.save(update_fields=["platform"])
+        pending_cover = MediaAsset.objects.create(
+            organization=organization,
+            workspace=workspace,
+            file="media_library/pending-cover.jpg",
+            filename="pending-cover.jpg",
+            media_type=MediaAsset.MediaType.IMAGE,
+            mime_type="image/jpeg",
+            processing_status=MediaAsset.ProcessingStatus.PENDING,
+            width=1080,
+            height=1920,
+        )
+
+        _status, body = _post(
+            client_with_token,
+            _rpc(
+                "tools/call",
+                {
+                    "name": "create_draft",
+                    "arguments": {
+                        "social_account_id": str(social_account.id),
+                        "caption": "pending cover must fail closed",
+                        "post_type": "reel",
+                        "cover_image_asset_id": str(pending_cover.id),
+                    },
+                },
+            ),
+        )
+
+        assert body["error"]["code"] == INVALID_PARAMS
+        assert "completed image" in body["error"]["message"].lower()
+        assert Post.objects.count() == 0
 
     def test_rejects_account_outside_allowlist(self, client_with_token, second_account):
         status, body = _post(

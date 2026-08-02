@@ -1,6 +1,21 @@
 """Context processors for sidebar and global template data."""
 
+from django.conf import settings
 from django.db.models import Count, Q
+
+
+def authentication_context(_request):
+    """Expose only authentication methods that are fully configured.
+
+    django-allauth reports social accounts as enabled whenever the app is
+    installed, even if the configured Google OAuth app has empty credentials.
+    Rendering that provider produces a login flow that fails with a missing
+    ``client_id``.  Keep email/password available and hide Google login until
+    both required credentials are present.
+    """
+    return {
+        "GOOGLE_AUTH_ENABLED": bool(settings.GOOGLE_AUTH_CLIENT_ID and settings.GOOGLE_AUTH_CLIENT_SECRET),
+    }
 
 
 def sidebar_context(request):
