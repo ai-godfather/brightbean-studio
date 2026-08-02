@@ -35,16 +35,33 @@ docker compose --env-file deploy/hetzner/.env \
   -f deploy/hetzner/docker-compose.yml ps
 ```
 
-Add both routes from `Caddyfile.shopauth.snippet` to ShopAuth's Caddyfile,
-validate it, and reload Caddy. `X-Forwarded-Proto` must be `https`, otherwise
-Django's production SSL redirect loops behind Cloudflare Flexible.
+Production deployment is owned by this repository. The `Deploy Hetzner`
+workflow runs automatically after a green `CI` push on `main`, and can also be
+started manually. It deploys only `/opt/brightbean-studio`, preserves the
+untracked production environment file, installs the BrightBean-owned ingress
+reconciler, and records the deployed revision in `.deploy-revision`.
 
-Because ShopAuth recreates the shared Caddy container from its own deployment
-tree, install BrightBean's independent route reconciler once on the host:
+The GitHub `production` environment requires these values:
+
+- secret `PROD_SERVER_IP`
+- secret `PROD_SSH_PRIVATE_KEY`
+- variable `PROD_SSH_USER` (defaults to `root`)
+
+Because one VPS IP can have only one public listener on ports 80 and 443,
+BrightBean shares the edge Caddy container and Docker network with ShopAuth.
+BrightBean does not depend on a BrightBean route being present in the ShopAuth
+Git repository. Install BrightBean's independent route reconciler once on the
+host:
 
 ```bash
 sudo deploy/hetzner/install-caddy-route-keeper.sh
 ```
+
+`Caddyfile.shopauth.snippet` is the canonical BrightBean-owned route fragment.
+The reconciler injects it into the deployed shared Caddyfile, validates the
+complete candidate, and reloads only Caddy. Do not commit this fragment to the
+ShopAuth repository. `X-Forwarded-Proto` must remain `https`, otherwise Django's
+production SSL redirect loops behind Cloudflare Flexible.
 
 The BrightBean-owned systemd path unit repairs the route immediately after the
 shared Caddyfile changes, while a 60-second timer covers missed file events. The
