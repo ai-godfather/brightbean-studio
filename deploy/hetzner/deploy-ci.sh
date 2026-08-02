@@ -54,7 +54,7 @@ ssh "${ssh_options[@]}" "$ssh_target" \
 ssh "${ssh_options[@]}" "$ssh_target" \
   "chmod +x '$TARGET/deploy/hetzner/'*.sh '$TARGET/deploy/hetzner/ensure_brightbean_route.py' && printf '%s\n' '$DEPLOY_REVISION' > '$TARGET/.deploy-attempt'"
 
-remote_compose="docker compose --env-file '$TARGET/$ENV_FILE' -f '$TARGET/$COMPOSE_FILE'"
+remote_compose="BRIGHTBEAN_IMAGE_TAG='$DEPLOY_REVISION' docker compose --env-file '$TARGET/$ENV_FILE' -f '$TARGET/$COMPOSE_FILE'"
 
 ssh "${ssh_options[@]}" "$ssh_target" "$remote_compose config --quiet"
 
@@ -72,7 +72,30 @@ ssh "${ssh_options[@]}" "$ssh_target" \
   "'$TARGET/deploy/hetzner/install-caddy-route-keeper.sh'"
 
 ssh "${ssh_options[@]}" "$ssh_target" \
-  "$remote_compose ps && test \"\$(docker inspect -f '{{.State.Health.Status}}' brightbean-production-app-1)\" = healthy"
+  "$remote_compose ps"
+
+health_status="starting"
+for attempt in $(seq 1 30); do
+  health_status="$(
+    ssh "${ssh_options[@]}" "$ssh_target" \
+      "docker inspect -f '{{.State.Health.Status}}' brightbean-production-app-1"
+  )"
+  if [[ "$health_status" == "healthy" ]]; then
+    break
+  fi
+  if [[ "$health_status" == "unhealthy" ]]; then
+    ssh "${ssh_options[@]}" "$ssh_target" \
+      "docker logs --tail 100 brightbean-production-app-1" >&2
+    echo "[brightbean-deploy] app became unhealthy" >&2
+    exit 1
+  fi
+  sleep 5
+done
+
+if [[ "$health_status" != "healthy" ]]; then
+  echo "[brightbean-deploy] app health timed out with status=$health_status" >&2
+  exit 1
+fi
 
 curl --fail --silent --show-error --location --max-time 30 \
   "https://studio.shopauth.cloud/health/" >/dev/null
