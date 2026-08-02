@@ -21,7 +21,7 @@ class SocialAccountsConfig(AppConfig):
         try:
             from background_task.models import Task
 
-            from apps.social_accounts.tasks import schedule_all_health_checks
+            from apps.social_accounts.tasks import purge_invalid_youtube_authorizations, schedule_all_health_checks
 
             if not Task.objects.filter(verbose_name="schedule_all_health_checks").exists():
                 schedule_all_health_checks(
@@ -29,5 +29,11 @@ class SocialAccountsConfig(AppConfig):
                     verbose_name="schedule_all_health_checks",
                 )
                 logger.info("Registered recurring health-check task (every 6h)")
+            if not Task.objects.filter(verbose_name="purge_invalid_youtube_authorizations").exists():
+                purge_invalid_youtube_authorizations(
+                    repeat=24 * 3600,
+                    verbose_name="purge_invalid_youtube_authorizations",
+                )
+                logger.info("Registered YouTube authorization-retention purge (daily)")
         except Exception:
             logger.debug("Skipping health-check task registration (database not ready)")

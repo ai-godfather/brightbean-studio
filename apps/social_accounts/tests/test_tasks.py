@@ -7,7 +7,8 @@ import pytest
 from django.utils import timezone
 
 from apps.social_accounts.models import SocialAccount
-from apps.social_accounts.tasks import check_social_account_health
+from apps.social_accounts.tasks import check_social_account_health, purge_invalid_youtube_authorizations
+from providers.exceptions import APIError
 from providers.types import AccountProfile, OAuthTokens
 
 
@@ -126,6 +127,63 @@ class TestCheckSocialAccountHealth:
         account = SocialAccount.objects.get(pk=connected_account.pk)
         assert account.connection_status == SocialAccount.ConnectionStatus.ERROR
         assert account.last_error == "Connection check failed. Please try reconnecting."
+
+    @patch("providers.get_provider")
+    def test_youtube_unauthorized_starts_retention_clock(self, mock_get_provider, workspace):
+        account = SocialAccount.objects.create(
+            workspace=workspace,
+            platform="youtube",
+            account_platform_id="UC123",
+            account_name="Channel",
+            oauth_access_token="expired",
+            oauth_refresh_token="revokable",
+        )
+        mock_provider = MagicMock()
+        mock_provider.get_profile.side_effect = APIError("Unauthorized", status_code=401)
+        mock_get_provider.return_value = mock_provider
+
+        check_social_account_health.now(str(account.id))
+
+        account.refresh_from_db()
+        assert account.connection_status == SocialAccount.ConnectionStatus.ERROR
+        assert account.authorization_invalid_since is not None
+
+    @patch("providers.get_provider")
+    def test_youtube_transient_failure_does_not_start_retention_clock(self, mock_get_provider, workspace):
+        account = SocialAccount.objects.create(
+            workspace=workspace,
+            platform="youtube",
+            account_platform_id="UC123",
+            account_name="Channel",
+            oauth_access_token="token",
+        )
+        mock_provider = MagicMock()
+        mock_provider.get_profile.side_effect = APIError("Unavailable", status_code=503)
+        mock_get_provider.return_value = mock_provider
+
+        check_social_account_health.now(str(account.id))
+
+        account.refresh_from_db()
+        assert account.authorization_invalid_since is None
+
+    @patch("providers.get_provider")
+    def test_successful_youtube_check_clears_retention_clock(self, mock_get_provider, workspace):
+        account = SocialAccount.objects.create(
+            workspace=workspace,
+            platform="youtube",
+            account_platform_id="UC123",
+            account_name="Channel",
+            oauth_access_token="token",
+            authorization_invalid_since=timezone.now() - timedelta(days=3),
+        )
+        mock_provider = MagicMock()
+        mock_provider.get_profile.return_value = _profile(platform_id="UC123", name="Channel")
+        mock_get_provider.return_value = mock_provider
+
+        check_social_account_health.now(str(account.id))
+
+        account.refresh_from_db()
+        assert account.authorization_invalid_since is None
 
     @patch("providers.get_provider")
     def test_token_refresh_on_expiring(self, mock_get_provider, connected_account):
@@ -262,3 +320,38 @@ class TestCheckSocialAccountHealth:
         assert account.oauth_refresh_token == "fresh_refresh"
         assert account.token_expires_at is not None
         assert account.connection_status == SocialAccount.ConnectionStatus.CONNECTED
+
+
+@pytest.mark.django_db
+class TestPurgeInvalidYouTubeAuthorizations:
+    @patch("apps.social_accounts.services.revoke_social_account_token", return_value=True)
+    def test_deletes_account_after_30_days(self, mock_revoke, workspace):
+        account = SocialAccount.objects.create(
+            workspace=workspace,
+            platform="youtube",
+            account_platform_id="UC-expired",
+            account_name="Expired channel",
+            oauth_access_token="expired",
+            authorization_invalid_since=timezone.now() - timedelta(days=31),
+        )
+
+        purge_invalid_youtube_authorizations.now()
+
+        assert not SocialAccount.objects.filter(pk=account.pk).exists()
+        mock_revoke.assert_called_once()
+
+    @patch("apps.social_accounts.services.revoke_social_account_token", return_value=True)
+    def test_keeps_account_during_30_day_recovery_window(self, mock_revoke, workspace):
+        account = SocialAccount.objects.create(
+            workspace=workspace,
+            platform="youtube",
+            account_platform_id="UC-recent",
+            account_name="Recent failure",
+            oauth_access_token="expired",
+            authorization_invalid_since=timezone.now() - timedelta(days=29),
+        )
+
+        purge_invalid_youtube_authorizations.now()
+
+        assert SocialAccount.objects.filter(pk=account.pk).exists()
+        mock_revoke.assert_not_called()

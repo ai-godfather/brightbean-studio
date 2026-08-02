@@ -765,16 +765,9 @@ def disconnect(request, workspace_id, account_id):
     """Disconnect a social account."""
     account = get_object_or_404(SocialAccount.objects.for_workspace(workspace_id), id=account_id)
 
-    # Try to revoke token
-    try:
-        provider = _get_provider_for_platform(account.platform, request.org.id)
-        if account.oauth_access_token:
-            provider.revoke_token(account.oauth_access_token)
-    except Exception:
-        logger.warning(
-            "Failed to revoke token for %s, proceeding with disconnect",
-            account,
-        )
+    from .services import revoke_social_account_token
+
+    revoke_social_account_token(account)
 
     # Delete posts that ONLY target this account (will be fully orphaned).
     # Multi-platform posts keep their other PlatformPost targets via cascade.
@@ -838,6 +831,7 @@ def _create_or_update_account(
             "token_expires_at": token_expires_at,
             "instance_url": instance_url,
             "connection_status": SocialAccount.ConnectionStatus.CONNECTED,
+            "authorization_invalid_since": None,
             "last_error": "",
             # Fresh OAuth grant invalidates any prior analytics-scope failure.
             "analytics_needs_reconnect": False,

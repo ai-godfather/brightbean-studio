@@ -49,6 +49,11 @@ class SocialAccount(models.Model):
         default=ConnectionStatus.CONNECTED,
     )
     last_health_check_at = models.DateTimeField(blank=True, null=True)
+    authorization_invalid_since = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="First confirmed OAuth authorization failure; used for API-data retention enforcement.",
+    )
     last_error = models.TextField(blank=True, default="")
 
     connected_at = models.DateTimeField(auto_now_add=True)

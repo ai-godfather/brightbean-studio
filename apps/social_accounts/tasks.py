@@ -9,6 +9,22 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
+def _is_authorization_failure(exc: Exception) -> bool:
+    """Return True only for failures that establish an invalid OAuth grant."""
+    from providers.exceptions import APIError, OAuthError, TokenExpiredError
+
+    if isinstance(exc, (OAuthError, TokenExpiredError)):
+        return True
+    if isinstance(exc, APIError):
+        if exc.status_code == 401:
+            return True
+        error = (exc.raw_response or {}).get("error")
+        if isinstance(error, dict):
+            error = error.get("status") or error.get("message")
+        return error in {"ExpiredToken", "invalid_token", "InvalidToken", "invalid_grant", "UNAUTHENTICATED"}
+    return False
+
+
 @background(schedule=0)
 def check_social_account_health(account_id: str):
     """Check health of a single social account.
@@ -77,11 +93,14 @@ def check_social_account_health(account_id: str):
             account.account_handle = profile.handle
         if account.connection_status != SocialAccount.ConnectionStatus.TOKEN_EXPIRING:
             account.connection_status = SocialAccount.ConnectionStatus.CONNECTED
+        account.authorization_invalid_since = None
         account.last_error = ""
     except Exception as e:
         logger.warning("Health check: profile fetch failed for %s: %s", account, e)
         account.connection_status = SocialAccount.ConnectionStatus.ERROR
         account.last_error = friendly_health_check_error(e)
+        if account.platform == "youtube" and _is_authorization_failure(e):
+            account.authorization_invalid_since = account.authorization_invalid_since or timezone.now()
 
     account.last_health_check_at = timezone.now()
     account.save(
@@ -94,6 +113,7 @@ def check_social_account_health(account_id: str):
             "account_name",
             "account_handle",
             "connection_status",
+            "authorization_invalid_since",
             "last_error",
             "last_health_check_at",
             "updated_at",
@@ -110,6 +130,7 @@ def schedule_all_health_checks():
         connection_status__in=[
             SocialAccount.ConnectionStatus.CONNECTED,
             SocialAccount.ConnectionStatus.TOKEN_EXPIRING,
+            SocialAccount.ConnectionStatus.ERROR,
         ]
     ).values_list("id", flat=True)
 
@@ -119,3 +140,26 @@ def schedule_all_health_checks():
         count += 1
 
     logger.info("Scheduled health checks for %d accounts", count)
+
+
+@background(schedule=0)
+def purge_invalid_youtube_authorizations():
+    """Delete YouTube API data after 30 days of confirmed invalid authorization."""
+    from .models import SocialAccount
+    from .services import revoke_social_account_token
+
+    cutoff = timezone.now() - timedelta(days=30)
+    accounts = SocialAccount.objects.filter(
+        platform="youtube",
+        authorization_invalid_since__lte=cutoff,
+    ).select_related("workspace")
+
+    count = 0
+    for account in accounts.iterator():
+        account_id = account.pk
+        revoke_social_account_token(account)
+        account.delete()
+        count += 1
+        logger.info("Deleted YouTube API data for invalid authorization on social account %s", account_id)
+
+    logger.info("Purged %d invalid YouTube authorization(s)", count)

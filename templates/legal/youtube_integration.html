@@ -1,0 +1,47 @@
+{% extends "legal/base.html" %}
+
+{% block title %}YouTube Integration{% endblock %}
+{% block meta_description %}How BrightBean Social Studio connects to YouTube for user-controlled video publishing, comments, and analytics.{% endblock %}
+{% block heading %}YouTube Integration{% endblock %}
+
+{% block content %}
+<p class="summary">
+    BrightBean Social Studio is a content-planning and publishing workspace. Its YouTube integration
+    lets an authorized channel owner or manager prepare, schedule, and upload videos and Shorts,
+    manage comments, and review channel and video analytics from one workspace.
+</p>
+
+<h2>What the integration does</h2>
+<ul>
+    <li>Connects the YouTube channel selected by the user through Google's OAuth consent flow.</li>
+    <li>Uploads a video or Short only after the user selects the channel, media, title, description, and visibility.</li>
+    <li>Supports public, unlisted, and private visibility chosen by the user before publication.</li>
+    <li>Shows publishing status and the YouTube video ID for the completed upload.</li>
+    <li>Provides authorized comment-management and analytics features when enabled.</li>
+</ul>
+
+<h2>User control</h2>
+<p>
+    The user initiates each connection and publishing action. BrightBean Studio does not request a
+    Google password and does not change YouTube visibility without the user's selection. Access can
+    be revoked by disconnecting the channel in BrightBean Studio or from
+    <a href="https://security.google.com/settings/security/permissions" rel="noopener noreferrer">Google's third-party connections settings</a>.
+</p>
+
+<h2>Data and policies</h2>
+<p>
+    Our <a href="{% url 'privacy_policy' %}">Privacy Policy</a> explains the Google and YouTube data
+    we access, why we use it, retention periods, Limited Use compliance, and deletion controls.
+    Please also review our <a href="{% url 'terms_of_service' %}">Terms of Service</a> and
+    <a href="{% url 'data_deletion' %}">Data Deletion Instructions</a>.
+</p>
+
+<div class="contact-card">
+    <h2>Support</h2>
+    <p>
+        Questions about the YouTube integration can be sent to
+        <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>. Existing users can
+        <a href="/accounts/login/">sign in to BrightBean Studio</a> to connect or manage a channel.
+    </p>
+</div>
+{% endblock %}
