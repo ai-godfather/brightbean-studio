@@ -7,8 +7,8 @@
 {% block content %}
 <p class="summary">
     You can disconnect a social account at any time and can request deletion of your BrightBean
-    Studio account and associated personal data. You do not need to provide your Instagram or
-    Facebook password.
+    Studio account and associated personal data. You do not need to provide your Instagram,
+    Facebook, Google, or YouTube password.
 </p>
 
 <h2>Option 1: Disconnect a social account</h2>
@@ -20,11 +20,22 @@
         For additional control, open the connected platform’s account settings and revoke
         BrightBean Studio / Social Studio access.
     </li>
+    <li>
+        For Google or YouTube, you can also revoke access from
+        <a href="https://security.google.com/settings/security/permissions" rel="noopener noreferrer">Google's third-party connections settings</a>.
+    </li>
 </ol>
 <p>
     Disconnecting stops new API access for that account and removes the active authorization from
     BrightBean Studio. Content already published to the social platform remains there until you
     remove it on that platform.
+</p>
+<p>
+    For YouTube, disconnecting in BrightBean Studio triggers token revocation and immediately
+    deletes the connected-channel record, stored YouTube API profile data, publishing records tied
+    to that connection, and associated analytics snapshots. Revoking access in Google settings
+    stops new access; after BrightBean Studio detects that authorization can no longer be verified,
+    associated YouTube API data is deleted within 30 days.
 </p>
 
 <h2>Option 2: Delete your BrightBean Studio account</h2>
@@ -42,7 +53,7 @@
 <ul>
     <li>The email address used for your BrightBean Studio account.</li>
     <li>The organization or workspace name, if applicable.</li>
-    <li>The username of any connected Instagram, Facebook, or other social account to be removed.</li>
+    <li>The username or channel handle of any connected Instagram, Facebook, YouTube, or other social account to be removed.</li>
     <li>Whether you want one integration removed or the entire BrightBean Studio account deleted.</li>
 </ul>
 <p>
@@ -67,11 +78,11 @@
     used for normal product features.
 </p>
 
-<h2>Removing data from Meta or Instagram</h2>
+<h2>Removing data from a connected platform</h2>
 <p>
     Deleting data from BrightBean Studio does not automatically delete posts, messages, or account
-    data held independently by Meta or Instagram. Use the relevant platform’s controls to delete
-    platform-hosted content or the social account itself.
+    data held independently by Meta, Instagram, Google, YouTube, or another platform. Use the
+    relevant platform’s controls to delete platform-hosted content or the social account itself.
 </p>
 
 <div class="contact-card">

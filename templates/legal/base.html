@@ -135,6 +135,7 @@
                 <span><small>BrightBean</small>Social Studio</span>
             </a>
             <nav aria-label="Legal navigation">
+                <a href="{% url 'youtube_integration' %}">YouTube</a>
                 <a href="{% url 'privacy_policy' %}">Privacy</a>
                 <a href="{% url 'terms_of_service' %}">Terms</a>
                 <a href="{% url 'data_deletion' %}">Data deletion</a>
@@ -144,7 +145,7 @@
     <main>
         <p class="eyebrow">BrightBean · Social Studio</p>
         <h1>{% block heading %}{% endblock %}</h1>
-        <p class="updated">Effective and last updated: July 27, 2026</p>
+        <p class="updated">Effective and last updated: August 2, 2026</p>
         {% block content %}{% endblock %}
     </main>
     <footer>

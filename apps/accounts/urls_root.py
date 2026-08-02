@@ -19,5 +19,10 @@ urlpatterns = [
         TemplateView.as_view(template_name="legal/data_deletion.html"),
         name="data_deletion",
     ),
+    path(
+        "youtube-integration/",
+        TemplateView.as_view(template_name="legal/youtube_integration.html"),
+        name="youtube_integration",
+    ),
     path("", views.dashboard, name="dashboard"),
 ]

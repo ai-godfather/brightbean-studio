@@ -344,14 +344,12 @@ class TestDisconnectView:
             "social_accounts:disconnect",
             kwargs={"workspace_id": workspace.id, "account_id": account.id},
         )
-        with patch("apps.social_accounts.views._get_provider_for_platform") as mock:
-            mock_provider = MagicMock()
-            mock_provider.revoke_token.return_value = True
-            mock.return_value = mock_provider
+        with patch("apps.social_accounts.services.revoke_social_account_token", return_value=True) as mock_revoke:
             response = authenticated_client.post(url)
 
         assert response.status_code == 302
         assert SocialAccount.objects.filter(pk=account.pk).count() == 0
+        mock_revoke.assert_called_once()
 
     def test_disconnect_requires_post(self, authenticated_client, workspace):
         account = SocialAccount.objects.create(

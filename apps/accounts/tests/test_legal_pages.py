@@ -34,3 +34,26 @@ class LegalPagesTests(TestCase):
 
         self.assertContains(response, reverse("terms_of_service"))
         self.assertContains(response, reverse("privacy_policy"))
+
+    def test_google_and_youtube_disclosures_are_public(self):
+        privacy = self.client.get(reverse("privacy_policy"))
+        self.assertContains(privacy, "Google API Services User Data Policy")
+        self.assertContains(privacy, "including the Limited Use requirements")
+        self.assertContains(privacy, "Google Privacy Policy")
+        self.assertContains(privacy, "security.google.com/settings/security/permissions")
+        self.assertContains(privacy, "delete the associated YouTube API data no later than 30 days")
+
+        terms = self.client.get(reverse("terms_of_service"))
+        self.assertContains(terms, "YouTube Terms of Service")
+        self.assertContains(terms, "YouTube API Services Developer Policies")
+
+        deletion = self.client.get(reverse("data_deletion"))
+        self.assertContains(deletion, "Google's third-party connections settings")
+        self.assertContains(deletion, "associated YouTube API data is deleted within 30 days")
+
+        product_page = self.client.get(reverse("youtube_integration"))
+        self.assertEqual(product_page.status_code, 200)
+        self.assertContains(product_page, "YouTube Integration")
+        self.assertContains(product_page, reverse("privacy_policy"))
+        self.assertContains(product_page, reverse("terms_of_service"))
+        self.assertContains(product_page, reverse("data_deletion"))

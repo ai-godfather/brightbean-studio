@@ -76,6 +76,8 @@ class Organization(models.Model):
         from apps.accounts.models import User
         from apps.accounts.signals import provision_organization_and_workspace
         from apps.members.models import OrgMembership
+        from apps.social_accounts.models import SocialAccount
+        from apps.social_accounts.services import revoke_social_account_token
         from apps.workspaces.models import Workspace
 
         member_ids = list(OrgMembership.objects.filter(organization=self).values_list("user_id", flat=True))
@@ -83,6 +85,13 @@ class Organization(models.Model):
 
         if ws_ids:
             User.objects.filter(last_workspace_id__in=ws_ids).update(last_workspace_id=None)
+
+        # Revocation must happen before the cascade removes the encrypted
+        # tokens. It is best-effort so a provider outage cannot trap the user
+        # in an undeletable organization.
+        social_accounts = SocialAccount.objects.filter(workspace__organization=self).select_related("workspace")
+        for social_account in social_accounts.iterator():
+            revoke_social_account_token(social_account)
 
         self.delete()  # CASCADE: workspaces, memberships, credentials, media, etc.
 

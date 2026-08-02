@@ -1,8 +1,10 @@
-"""Tests for YouTubeProvider.get_post_analytics."""
+"""Tests for the YouTube provider."""
 
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from providers.types import PostType, PublishContent
 from providers.youtube import _ANALYTICS_VIDEO_FILTER_CHUNK, YouTubeProvider
 
 
@@ -17,6 +19,39 @@ def _date_range() -> tuple[datetime, datetime]:
         datetime(2005, 2, 14, 0, 0, 0, tzinfo=UTC),
         datetime(2026, 6, 3, 23, 59, 59, tzinfo=UTC),
     )
+
+
+def test_publish_does_not_return_raw_youtube_api_data(tmp_path: Path):
+    video_path = tmp_path / "short.mp4"
+    video_path.write_bytes(b"video")
+
+    init_response = _make_response({})
+    init_response.headers = {"Location": "https://upload.youtube.test/session"}
+    upload_response = _make_response(
+        {
+            "id": "video-123",
+            "snippet": {"title": "Sensitive API metadata"},
+            "status": {"privacyStatus": "private"},
+        }
+    )
+
+    provider = YouTubeProvider()
+    with patch.object(provider, "_request", side_effect=[init_response, upload_response]) as mock_request:
+        result = provider.publish_post(
+            "token",
+            PublishContent(
+                title="Demo",
+                post_type=PostType.SHORT,
+                media_files=[str(video_path)],
+                extra={"privacy_status": "private"},
+            ),
+        )
+
+    assert result.platform_post_id == "video-123"
+    assert result.extra == {}
+
+    metadata = mock_request.call_args_list[0].kwargs["json"]
+    assert metadata["snippet"]["title"] == "Demo"
 
 
 class TestGetPostAnalytics:

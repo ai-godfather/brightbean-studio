@@ -209,10 +209,6 @@ class YouTubeProvider(SocialProvider):
         title = content.title or content.text or ""
         description = content.description or content.text or ""
 
-        # Shorts: add #Shorts tag if not already present
-        if content.post_type == PostType.SHORT and "#Shorts" not in title:
-            title = f"{title} #Shorts".strip()
-
         privacy_status = content.extra.get("privacy_status", "public")
         made_for_kids = content.extra.get("self_declared_made_for_kids", False)
         category_id = content.extra.get("category_id", "22")  # 22 = People & Blogs
@@ -292,7 +288,10 @@ class YouTubeProvider(SocialProvider):
             return PublishResult(
                 platform_post_id=video_id,
                 url=f"https://www.youtube.com/watch?v={video_id}" if video_id else None,
-                extra=upload_body,
+                # The durable video ID is stored separately by PlatformPost.
+                # Avoid retaining the full YouTube API response (snippet,
+                # thumbnails and status) when it is not needed by the product.
+                extra={},
             )
 
         raise PublishError(
