@@ -515,11 +515,7 @@ class PublishEngine:
         # 2. Platform defaults
         if platform == "pinterest":
             return PostType.PIN
-        if (
-            media_count == 1
-            and platform in ("instagram", "instagram_login")
-            and first_media_type == "video"
-        ):
+        if media_count == 1 and platform in ("instagram", "instagram_login") and first_media_type == "video":
             return PostType.REEL
 
         # 3. Multi-media → CAROUSEL for Instagram/Threads

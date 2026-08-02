@@ -20,13 +20,8 @@ app_name = "oauth2_provider"
 # target must be allowlisted on the consent page or the flow dies silently there.
 # csp_update appends to the global CSP_FORM_ACTION, scoping the relaxation here only.
 authorize_view = csp_update(
-    FORM_ACTION=(
-        "https://claude.ai https://claude.com "
-        "http://127.0.0.1:* http://localhost:* http://[::1]:*"
-    )
-)(
-    views.NativeLoopbackAuthorizationView.as_view()
-)
+    FORM_ACTION=("https://claude.ai https://claude.com http://127.0.0.1:* http://localhost:* http://[::1]:*")
+)(views.NativeLoopbackAuthorizationView.as_view())
 
 urlpatterns = [
     path("authorize/", authorize_view, name="authorize"),
