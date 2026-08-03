@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
 
@@ -67,6 +68,31 @@ class LegalPagesTests(TestCase):
         self.assertContains(product_page, reverse("privacy_policy"))
         self.assertContains(product_page, reverse("terms_of_service"))
         self.assertContains(product_page, reverse("data_deletion"))
+
+    def test_root_homepage_is_public_and_matches_oauth_branding(self):
+        homepage = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(homepage.status_code, 200)
+        self.assertEqual(homepage.request["PATH_INFO"], "/")
+        self.assertContains(homepage, "<h1>BrightBean Social Studio</h1>", html=True)
+        self.assertContains(homepage, "BrightBean Social Studio helps individual creators")
+        self.assertContains(homepage, "accesses the selected channel identity")
+        self.assertContains(homepage, reverse("privacy_policy"))
+        self.assertContains(homepage, reverse("terms_of_service"))
+        self.assertContains(homepage, reverse("data_deletion"))
+
+    def test_root_keeps_the_dashboard_for_authenticated_users(self):
+        user = User.objects.create_user(
+            email="dashboard@example.com",
+            password="test-password",
+            tos_accepted_at=timezone.now(),
+        )
+        self.client.force_login(user)
+
+        homepage = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(homepage.status_code, 302)
+        self.assertRegex(homepage.url, r"^/workspace/[0-9a-f-]+/calendar/$")
 
     def test_individual_operator_and_subscription_disclosures_are_public(self):
         for route_name in ("privacy_policy", "terms_of_service", "data_deletion"):
