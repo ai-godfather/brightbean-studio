@@ -228,8 +228,11 @@ def send_reply(request, workspace_id, message_id):
         from apps.publisher.engine import _resolve_publish_credentials
 
         provider = get_provider(account.platform, _resolve_publish_credentials(account))
+        access_token = account.oauth_access_token
+        if account.token_expires_at and account.is_token_expiring_soon and account.oauth_refresh_token:
+            access_token = account.refresh_oauth_token(provider)
         result = provider.reply_to_message(
-            access_token=account.oauth_access_token,
+            access_token=access_token,
             message_id=message.platform_message_id,
             text=body,
             extra=message.extra,
