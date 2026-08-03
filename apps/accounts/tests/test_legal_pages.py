@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
 
@@ -81,7 +82,11 @@ class LegalPagesTests(TestCase):
         self.assertContains(homepage, reverse("data_deletion"))
 
     def test_root_keeps_the_dashboard_for_authenticated_users(self):
-        user = User.objects.create_user(email="dashboard@example.com", password="test-password")
+        user = User.objects.create_user(
+            email="dashboard@example.com",
+            password="test-password",
+            tos_accepted_at=timezone.now(),
+        )
         self.client.force_login(user)
 
         homepage = self.client.get(reverse("dashboard"))
