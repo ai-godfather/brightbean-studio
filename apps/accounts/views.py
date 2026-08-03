@@ -13,9 +13,11 @@ def health_check(request):
     return JsonResponse({"status": "ok"})
 
 
-@login_required
 def dashboard(request):
-    """Main dashboard - redirects to last used workspace or shows org overview."""
+    """Show the public product page or the signed-in user's dashboard."""
+    if not request.user.is_authenticated:
+        return render(request, "legal/youtube_integration.html")
+
     from apps.members.models import WorkspaceMembership
 
     user = request.user
