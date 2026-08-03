@@ -53,7 +53,17 @@ class LegalPagesTests(TestCase):
 
         product_page = self.client.get(reverse("youtube_integration"))
         self.assertEqual(product_page.status_code, 200)
-        self.assertContains(product_page, "YouTube Integration")
+        self.assertContains(
+            product_page,
+            "<title>BrightBean Social Studio — YouTube Publishing and Analytics · BrightBean Social Studio</title>",
+            html=True,
+        )
+        self.assertContains(product_page, "<h1>BrightBean Social Studio</h1>", html=True)
+        self.assertContains(product_page, 'alt="BrightBean Social Studio"')
+        self.assertContains(product_page, "BrightBean Social Studio helps individual creators")
+        self.assertContains(product_page, "accesses the selected channel identity")
+        self.assertContains(product_page, "never publishes")
+        self.assertContains(product_page, "content or changes visibility without an explicit user action")
         self.assertContains(product_page, reverse("privacy_policy"))
         self.assertContains(product_page, reverse("terms_of_service"))
         self.assertContains(product_page, reverse("data_deletion"))
