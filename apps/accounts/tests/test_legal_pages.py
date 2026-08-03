@@ -57,3 +57,19 @@ class LegalPagesTests(TestCase):
         self.assertContains(product_page, reverse("privacy_policy"))
         self.assertContains(product_page, reverse("terms_of_service"))
         self.assertContains(product_page, reverse("data_deletion"))
+
+    def test_individual_operator_and_subscription_disclosures_are_public(self):
+        for route_name in ("privacy_policy", "terms_of_service", "data_deletion"):
+            with self.subTest(route_name=route_name):
+                response = self.client.get(reverse(route_name))
+                self.assertContains(response, "Piotr Kwiatkowski")
+                self.assertContains(response, "ul. Ludowa 9A")
+                self.assertContains(response, "August 3, 2026")
+
+        privacy = self.client.get(reverse("privacy_policy"))
+        self.assertContains(privacy, "payment-processor customer or checkout identifiers")
+        self.assertContains(privacy, "Stripe processes checkout and subscription payments")
+
+        terms = self.client.get(reverse("terms_of_service"))
+        self.assertContains(terms, "BrightBean Studio uses a freemium model")
+        self.assertContains(terms, "successive monthly billing periods")
