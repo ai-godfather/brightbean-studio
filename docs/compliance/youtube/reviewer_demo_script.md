@@ -52,7 +52,7 @@ Narration: “The read-only and analytics scopes identify the selected channel a
 
 Open the YouTube comments or Social Inbox view. Show a test comment thread and, if the deployed UI supports it, post a harmless reply on the reviewer-owned test content.
 
-Narration: “The force-ssl scope supports the implemented comment-reading, reply and moderation features. BrightBean does not use it to like, subscribe, or manipulate engagement.”
+Narration: “The force-ssl scope supports the implemented comment-reading, first-comment and reply features. BrightBean does not use it to like, subscribe, manipulate engagement, or call a comment-moderation endpoint.”
 
 ### 04:05–04:45 — Revocation and deletion controls
 

@@ -1,6 +1,6 @@
 # BrightBean YouTube verification package
 
-Prepared: 2026-08-02
+Prepared: 2026-08-03
 
 This directory is the source package for two separate Google reviews:
 
@@ -21,6 +21,15 @@ The reviews are related but not interchangeable. Complete OAuth verification in 
 - `SUBMISSION_RUNBOOK_PL.md` — Polish owner runbook and remaining human inputs.
 - `pdf/` — generated upload-ready PDFs.
 
+## Rebuild the PDFs
+
+From the repository root:
+
+```bash
+uv run --no-project --with-requirements docs/compliance/youtube/requirements.txt \
+  python docs/compliance/youtube/build_audit_pdfs.py
+```
+
 ## Public URLs after deployment
 
 - Application home page: https://studio.shopauth.cloud/youtube-integration/
@@ -29,7 +38,7 @@ The reviews are related but not interchangeable. Complete OAuth verification in 
 - Data Deletion Instructions: https://studio.shopauth.cloud/data-deletion/
 - OAuth redirect URI: https://studio.shopauth.cloud/social-accounts/callback/youtube/
 
-Do not submit until the current branch has been reviewed, deployed, migrated, and all four public pages return HTTP 200 with the 2026-08-02 revision.
+Do not submit until the current branch has been reviewed, deployed, migrated, and all four public pages return HTTP 200 with the 2026-08-03 revision.
 
 ## Sensitive material
 

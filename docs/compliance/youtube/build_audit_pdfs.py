@@ -263,7 +263,7 @@ def page_decor(canvas, document) -> None:
     canvas.line(16 * mm, 14 * mm, width - 16 * mm, 14 * mm)
     canvas.setFont("Arial", 7)
     canvas.setFillColor(colors.HexColor("#686b60"))
-    canvas.drawString(16 * mm, 9 * mm, "BrightBean Social Studio · Google/YouTube compliance package · 2026-08-02")
+    canvas.drawString(16 * mm, 9 * mm, "BrightBean Social Studio · Google/YouTube compliance package · 2026-08-03")
     canvas.drawRightString(width - 16 * mm, 9 * mm, f"Page {document.page}")
     canvas.restoreState()
 
@@ -290,7 +290,7 @@ def build_pdf(filename: str, title: str, story: list, pdf_styles: dict) -> None:
         Spacer(1, 5 * mm),
         Paragraph("Application: BrightBean Social Studio", pdf_styles["body"]),
         Paragraph("Production domain: studio.shopauth.cloud", pdf_styles["body"]),
-        Paragraph("Prepared: August 2, 2026", pdf_styles["body"]),
+        Paragraph("Prepared: August 3, 2026", pdf_styles["body"]),
         Spacer(1, 10 * mm),
         Paragraph(
             "This supporting PDF is a point-in-time snapshot. The live public policies and the deployed application are authoritative for the review.",
@@ -333,9 +333,9 @@ def main() -> None:
     )
 
     for template_name, output_name, title in (
-        ("privacy_policy.html", "BrightBean_Privacy_Policy_2026-08-02.pdf", "BrightBean Privacy Policy"),
-        ("terms_of_service.html", "BrightBean_Terms_of_Service_2026-08-02.pdf", "BrightBean Terms of Service"),
-        ("data_deletion.html", "BrightBean_Data_Deletion_2026-08-02.pdf", "BrightBean Data Deletion Instructions"),
+        ("privacy_policy.html", "BrightBean_Privacy_Policy_2026-08-03.pdf", "BrightBean Privacy Policy"),
+        ("terms_of_service.html", "BrightBean_Terms_of_Service_2026-08-03.pdf", "BrightBean Terms of Service"),
+        ("data_deletion.html", "BrightBean_Data_Deletion_2026-08-03.pdf", "BrightBean Data Deletion Instructions"),
     ):
         build_pdf(output_name, title, html_story(TEMPLATE_DIR / template_name, pdf_styles), pdf_styles)
 

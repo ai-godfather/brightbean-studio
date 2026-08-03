@@ -1,75 +1,298 @@
-# YouTube API Services audit — paste-ready answers
+# YouTube Data API Services Audit and Quota Extension Form
 
-## Request type
+Field-by-field draft for the current form at
+`https://support.google.com/youtube/contact/yt_api_form?hl=en`.
 
-Select the option for an **API compliance audit** required for an unverified API project / public upload access. Do not request additional quota unless the product actually needs more than the existing quota.
+Prepared: 2026-08-03
 
-## Applicant and organization
+Submission status: **DRAFT — DO NOT SUBMIT YET**. Values marked
+Remaining values marked `OWNER INPUT REQUIRED` must be supplied by the account
+owner. Reviewer credentials and the owner's telephone number must be entered only in Google's secure form and
+must never be committed to the repository.
 
-- Applicant name: `[OWNER INPUT REQUIRED: full legal name]`
-- Organization/legal entity: `[OWNER INPUT REQUIRED: exact registered name or state that this is an individual/sole trader]`
-- Address: `[OWNER INPUT REQUIRED]`
-- Phone: `[OWNER INPUT REQUIRED]`
-- Contact email: `admin@shopauth.cloud` plus the actively monitored Google Cloud project owner address
-- Website: `https://studio.shopauth.cloud/youtube-integration/`
+## Verified production and Google Cloud facts
 
-## API project and client
-
+- Google Cloud project name: `BrightBean Studio YouTube`
 - Google Cloud project ID: `micro-reef-504311-n9`
-- Google Cloud project number: `[OWNER INPUT REQUIRED: copy from Google Cloud Project info; do not infer from the client ID]`
-- API client name: `BrightBean Social Studio`
-- API client type: server-side web application
-- Production URL: `https://studio.shopauth.cloud/`
-- Public product page: `https://studio.shopauth.cloud/youtube-integration/`
+- Google Cloud project number: `648393702117`
+- API Client name: `BrightBean Social Studio`
+- Google account currently opening the form: `mediainteractiveai@gmail.com`
+- Production application: `https://studio.shopauth.cloud/`
+- Public YouTube product page: `https://studio.shopauth.cloud/youtube-integration/`
 - Privacy Policy: `https://studio.shopauth.cloud/privacy/`
 - Terms of Service: `https://studio.shopauth.cloud/terms/`
-- Data Deletion: `https://studio.shopauth.cloud/data-deletion/`
+- Data Deletion Instructions: `https://studio.shopauth.cloud/data-deletion/`
+- Login URL: `https://studio.shopauth.cloud/accounts/login/`
 - OAuth redirect URI: `https://studio.shopauth.cloud/social-accounts/callback/youtube/`
+- Current OAuth publishing status: `Testing` (must be changed to `Production` before submission)
+- Owner channel: `https://www.youtube.com/@godfather.a.i`
+- Domain ownership: owner-reported Search Console DNS verification completed on 2026-08-03
 
-## Detailed use case
+The previous pre-deployment check returned HTTP 200 for all five URLs on
+2026-08-02. After deploying this revision, repeat the check and require the
+four public product/legal pages to show the revision date August 3, 2026 before
+submitting the form.
 
-BrightBean Social Studio is a web-based social-media content-planning, approval, scheduling, publishing, comment-management and analytics workspace. A channel owner or authorized team member signs in to BrightBean, opens Social Accounts, and explicitly connects a YouTube channel through Google's OAuth consent flow. BrightBean retrieves the authenticated channel identity so the user can confirm the target.
+## Section 1: Request Type
 
-For publishing, the user selects a video file, chooses the connected YouTube channel, reviews or enters the video title and description, optionally sets tags and a custom thumbnail, declares whether the content is made for kids, and explicitly selects Public, Unlisted or Private visibility. The user then initiates immediate publication or sets a schedule. BrightBean uses the resumable `videos.insert` upload flow and stores the returned YouTube video ID as the publication result. BrightBean does not retain the full raw upload response.
+### Select the reason for your request
 
-When the user enables comments and analytics, BrightBean lets the authorized channel team view and reply to YouTube comments and view YouTube-labeled channel/video analytics. YouTube API data is visible only to the channel owner or authorized members of that workspace. The client does not scrape, download YouTube media, sell API data, profile viewers, manipulate engagement, or create derived YouTube scores.
+Select:
 
-## How users initiate YouTube actions
+> Complete a compliance audit to request for additional quota
 
-Every OAuth connection is initiated by a user with workspace permission to manage social accounts. Every upload has a selected YouTube target and a visible composer panel for title, description, tags, made-for-kids status and privacy. Public, unlisted and private are separate choices. Immediate upload or scheduled upload follows a user submit action. Comment replies and moderation are initiated from the YouTube-labeled inbox. BrightBean does not change an existing video's visibility without explicit user selection.
+This is the only first-audit path in the current form. In Section 5 select
+**No change / Default quota**. We are not asking for a quota increase; the
+purpose is the compliance audit required to lift the private-only restriction
+for uploads from the production API project.
 
-## Data storage and retention
+Do not select the re-audit option unless Google has explicitly requested a
+periodic re-audit for this project.
 
-OAuth tokens are encrypted. Channel identity/profile data is refreshed during authorization health checks, normally every six hours. YouTube analytics/statistics may be retained as dated historical data while the channel remains authorized and the metrics are needed to provide the owner-requested analytics feature; authorization is reconfirmed at least every 30 days. Other YouTube Authorized Data is refreshed or deleted within 30 days. Raw upload API responses are not retained.
+## Section 2: Organization and Contact Information
 
-In-product disconnect attempts immediate programmatic token revocation and deletes the connected-account record and related API-derived publishing/analytics data. If BrightBean detects that YouTube authorization can no longer be verified, it stops new access, retries health checks during a recovery window, and automatically deletes the connected YouTube API data after no more than 30 days. Users can also request deletion by email or revoke access from Google's third-party connections settings.
+### Application type
 
-## Expected API usage
+- If ShopAuth Cloud is a registered business/entity, select: **As an
+  organization or on behalf of an organization or registered entity**.
+- If no registered entity operates the service, select: **As an individual
+  user** and use the responsible person's legal details.
 
-- Product-level safety limit: maximum 6 YouTube publishes per connected account per day unless an explicit per-account administrative override is configured.
-- Standard project quota assumption: 10,000 quota units/day.
-- One resumable `videos.insert` flow per user-approved upload.
-- Channel profile/authorization health check: normally every 6 hours per active account.
-- Account analytics: normally daily.
-- Video analytics: hourly for posts under 24 hours, every 6 hours for posts aged 1–7 days, daily for posts aged 7–30 days, weekly for posts aged 30–90 days, then background refresh stops.
-- Initial rollout: a small number of owner-managed channels. `[OWNER INPUT REQUIRED: provide realistic expected connected-channel count for 3, 6 and 12 months.]`
+### Legal and address fields
 
-## Quota request
+| Form field | Answer |
+|---|---|
+| Your Full Legal Name | `Piotr Kwiatkowski` |
+| Your Organization's Legal Name | `Not applicable — individual applicant. ShopAuth Cloud is a service/brand name, not a registered legal entity.` |
+| Parent Company Name | Leave blank unless legally applicable |
+| Organization's Primary Website | `https://studio.shopauth.cloud/youtube-integration/` |
+| Country | `Other (please specify)` |
+| Country — other | `Poland` |
+| Street Address | `ul. Ludowa 9A` |
+| City | `Michałowice` |
+| State/Province | `Mazowieckie` |
+| Postal Code | `05-816` |
+| Category | `Creator Tools and Services` |
+| Business type | `Independent Developer/Sole Proprietor` — use this combined form option while applying as an individual content creator, not as a registered organization |
 
-No additional quota is requested in this submission unless the owner selects otherwise. The goal is the compliance audit needed to permit user-selected public/unlisted uploads from the production project. If the form requires a numeric request, use the current default quota and explain that no extension is requested.
+### Contacts
 
-## User control and deletion
+Recommended if the project-owner mailbox is monitored:
 
-Users can disconnect a channel from Social Accounts. BrightBean immediately removes the connection and stored YouTube API data and attempts to revoke the OAuth grant. The Privacy Policy links to Google's third-party connections settings. BrightBean explains that deleting BrightBean-held data does not delete content held independently on YouTube.
+| Form field | Answer |
+|---|---|
+| Primary contact name | `Piotr Kwiatkowski` |
+| Primary contact email | `mediainteractiveai@gmail.com` |
+| Primary technical contact | Select `Same as Primary Contact` |
+| Primary business contact | Select `Same as Primary Contact` |
 
-## Demo access
+The public support and privacy contact remains `admin@shopauth.cloud`.
 
-- Reviewer login URL: `https://studio.shopauth.cloud/accounts/login/`
-- Reviewer email: `[OWNER INPUT REQUIRED: dedicated reviewer account]`
-- Reviewer password: `[PROVIDE ONLY IN THE FORM'S SECURE FIELD; NEVER COMMIT]`
-- Reviewer YouTube channel: `[OWNER INPUT REQUIRED: dedicated test channel name and URL]`
-- Instructions: sign in, open Social Accounts, connect/select the reviewer-owned YouTube channel, then open Publish/New to view the YouTube composer settings. A preloaded harmless test MP4 should be available. Use Private visibility for the review upload unless the reviewer requests otherwise.
+## Section 3: Business Model and Google Contacts
 
-## Attached evidence
+### Describe your organization's work as it relates to YouTube
 
-Attach the combined audit dossier PDF and, if the form permits, the scope-justification PDF. Provide the unlisted demo-video URL in the video field. Legal policies should be submitted as live public URLs; PDFs are supporting snapshots, not replacements for public pages.
+Paste:
+
+> BrightBean Social Studio is a web-based social-media content-planning,
+> approval, scheduling, publishing, comment-management and analytics workspace
+> for channel owners and authorized teams. A user explicitly connects their
+> YouTube channel through Google OAuth and confirms the authenticated channel
+> identity. The user selects a video or Short, reviews the title, description,
+> tags, made-for-kids declaration and Public, Unlisted or Private visibility,
+> then initiates or schedules the upload. BrightBean uses the resumable
+> videos.insert flow and stores the returned video ID as the publication
+> result. Authorized users can view comment threads, post a first comment,
+> reply to comments, and view YouTube-labeled channel/video analytics. YouTube
+> API data is available only to the channel owner or authorized workspace
+> members. BrightBean does not scrape or download YouTube media, sell YouTube
+> API data, profile viewers, manipulate engagement, or train generalized AI
+> models on YouTube API data.
+
+### Primary audience
+
+Select only:
+
+- `Individual Content Creators (YouTubers, influencers)`
+
+### Monetization
+
+Select:
+
+- `Recurring Subscriptions (users pay monthly/yearly)`
+- `Freemium (free version with paid upgrades)`
+
+Rationale: the Studio has a free/pre-activation surface and offers paid
+per-organization Intelligence subscriptions. YouTube API data and YouTube
+access are not sold separately and are not used for advertising.
+
+### Advertising follow-up
+
+- Select `Not applicable` for selling advertisements or sponsorships on or
+  within YouTube content/the YouTube player.
+- The written-commercial-use-approval follow-up should not appear. If it does,
+  do not claim approval that has not been received.
+
+### Google relationship and identifiers
+
+| Form field | Answer |
+|---|---|
+| Google/YouTube representative | `No, I do not have a Google representative` unless the owner has a current named representative |
+| How did you first learn about the YouTube Data API? | `Google Developer Documentation` — owner must confirm this subjective answer before submission |
+| Content Owner ID(s) | Leave blank; BrightBean is not using YouTube Content Manager on behalf of a content owner |
+| Associated Channel URL | Leave blank because no Content Owner ID is supplied |
+| Google Ads Customer ID(s) | Leave blank; BrightBean is not using its own Ads Customer ID to manage campaigns for others in this integration |
+
+## Section 4: API Client Overview and Access Information
+
+| Form field | Answer |
+|---|---|
+| API Client Name | `BrightBean Social Studio` |
+| Does the name contain "YouTube"? | `No` |
+| Primary Access URL | `https://studio.shopauth.cloud/` |
+| Privacy Policy URL | `https://studio.shopauth.cloud/privacy/` |
+| Terms of Service URL | `https://studio.shopauth.cloud/terms/` |
+| Is the API Client publicly accessible? | `Yes` |
+| Demo Account Username or Email | `[OWNER INPUT REQUIRED: dedicated reviewer account]` |
+| Demo Account Password | `[ENTER ONLY IN GOOGLE'S SECURE FORM; NEVER COMMIT]` |
+| Login URL | `https://studio.shopauth.cloud/accounts/login/` |
+
+### Special Instructions for Access
+
+Paste after replacing the bracketed workspace/channel values:
+
+> Sign in with the provided dedicated reviewer credentials and open the
+> [REVIEWER WORKSPACE] workspace. Open Social Accounts and select the dedicated
+> reviewer-owned YouTube channel [TEST CHANNEL NAME/URL]. To review OAuth,
+> choose Connect and approve the four displayed YouTube permissions. Open New
+> / Publish, choose the preloaded harmless test MP4, select the YouTube target,
+> enter a title and description, show Tags and Made for Kids, choose Private,
+> and submit. The resulting YouTube video ID is shown in BrightBean and the
+> matching private upload can be viewed in YouTube Studio. Analytics is under
+> Analytics; comments are under Social Inbox with the YouTube filter. Use only
+> the dedicated reviewer connection. Disconnect it only after completing the
+> review.
+
+Select the demo-account acknowledgment only after the owner has reviewed and
+accepted its wording.
+
+## Section 5: Use Cases and Quota Extension Details
+
+### Project and use cases
+
+| Form field | Answer |
+|---|---|
+| How many project numbers are you adding? | `1` |
+| Google Cloud Project Number | `648393702117` |
+| Use cases | `Video Uploading & Account Management`; `Tools for Creators`; `Analytics & Reporting` |
+| Does the API Client require Google OAuth 2.0 sign-in? | `Yes` |
+| Analytics derived-metrics/data-storage acknowledgment | Select only after reviewing the linked policy |
+| Expected API Usage Volume | `Fewer than 1,000 requests per day` |
+
+### Endpoints actually used by the production code
+
+Select exactly:
+
+- `youtube.channels.list`
+- `youtube.videos.insert`
+- `youtube.thumbnails.set`
+- `youtube.commentThreads.insert`
+- `youtube.commentThreads.list`
+- `youtube.comments.insert`
+- `youtube.videos.list`
+
+Do not select `youtube.comments.setModerationStatus`: the production provider
+does not call that endpoint. Do not select `youtube.comments.list`: replies are
+read through `commentThreads.list` with the `replies` part. Do not select
+`youtube.videos.update`: metadata and visibility are supplied during
+`videos.insert`.
+
+The YouTube Analytics API `reports.query` calls are covered by the Analytics &
+Reporting use case and the analytics acknowledgment; that endpoint is not one
+of the Data API endpoint checkboxes in this form.
+
+### Quota
+
+- What total quota are you requesting? Select
+  `No change / Default quota (10k quota points)`.
+- Do not select the separate additional-quota checkbox for
+  `youtube.search.list`.
+- Do not select the separate additional-quota checkbox for
+  `youtube.videos.insert`.
+
+Current default allocation is 100 `videos.insert` calls/day in its separate
+upload bucket, 100 `search.list` calls/day in its separate search bucket, and
+10,000 units/day for the remaining endpoints. BrightBean additionally limits
+publishing to 6 YouTube uploads per connected account per day unless an
+explicit administrative override exists.
+
+If the form unexpectedly requires a quota justification despite selecting no
+change, paste:
+
+> No quota extension is requested. This submission seeks the compliance audit
+> required to lift the private-only upload restriction on the production
+> project. BrightBean expects fewer than 1,000 API requests per day during the
+> initial rollout and enforces a product limit of six YouTube uploads per
+> connected account per day unless an explicit administrative override is
+> configured.
+
+### Required evidence fields for Project #1
+
+Each field accepts one JPEG, PNG or PDF file.
+
+| Form upload field | File to provide | Status |
+|---|---|---|
+| Privacy Policy Screenshots | `pdf/BrightBean_Privacy_Policy_2026-08-03.pdf` | Ready after regeneration; live URL also required |
+| Homepage Screenshot | `projects/brightbean-youtube-oauth-review-demo/snapshots/sc01_public_identity.png` | Ready; shows YouTube branding and Privacy/Terms/Data deletion links |
+| Terms of Service Documentation | `pdf/BrightBean_Terms_of_Service_2026-08-03.pdf` | Ready after regeneration; live URL also required |
+| Conditional Evidence | `[CREATE FINAL COMBINED PDF: OAuth consent + upload interface + genuine live analytics + genuine live comment thread/reply]` | Blocked; do not use the reconstructed analytics/comments image as primary evidence |
+
+## Section 6: Additional Evidence and Documentation
+
+These fields are optional but recommended:
+
+| Form upload field | Recommended file |
+|---|---|
+| Architecture Diagram | `[CREATE FINAL ARCHITECTURE DIAGRAM after exact deployed components are confirmed]` |
+| User Flow Diagrams | `projects/brightbean-youtube-oauth-review-demo/assets/images/sc02-connect-start-guide.png` — label it as a guide, not a recording of the Connect click |
+| Other Supporting Materials | `pdf/BrightBean_YouTube_API_Audit_Dossier.pdf` |
+
+If only one supporting file is allowed, use the audit dossier rather than the
+separate scope-justification PDF because the dossier is the broader record.
+
+## Section 7: Attestations and Submission
+
+The owner must personally review and, if true, select all required items:
+
+- YouTube API Services Terms of Service
+- Google Privacy Policy
+- responsibility for current and future Developer Policy compliance
+- termination understanding
+- demo-account terms waiver, if a demo account is provided
+- accuracy and completeness of the submission
+- consent to processing the submission data
+- support recording consent
+
+Do not pre-check these boxes on the owner's behalf. Do not submit the form
+without an explicit final instruction after all blockers below are closed.
+
+## Submission blockers
+
+1. Supply the telephone number requested by the form only in Google's secure
+   form, confirm how the owner first learned about the API, and approve a
+   realistic 3/6/12-month channel forecast.
+2. Create a dedicated BrightBean reviewer account and a low-risk reviewer-owned
+   YouTube test channel; provide the password only in the form.
+3. Upload a square BrightBean Social Studio app logo, change OAuth publishing
+   status from `Testing` to `Production`, and capture a fresh OAuth screenshot/video.
+4. Capture genuine live Analytics UI. The existing reconstructed image is
+   clearly labeled as a reconstruction and is not acceptable as primary
+   reviewer evidence.
+5. Create an owner-controlled test comment, capture the live YouTube-filtered
+   thread and a harmless reply in BrightBean, and confirm it in YouTube Studio.
+   The form and scope copy must not claim moderation because the production
+   provider does not call a moderation endpoint.
+6. Build the final single conditional-evidence PDF from the corrected OAuth,
+   upload, analytics, comments and revocation evidence.
+7. Review every Section 7 attestation and the analytics data-storage
+   acknowledgment immediately before submission.

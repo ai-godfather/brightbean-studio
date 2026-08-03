@@ -6,7 +6,7 @@
 - [ ] Migration `0013_youtube_authorization_retention` applied successfully.
 - [ ] Background worker running and both recurring tasks registered: `schedule_all_health_checks` and `purge_invalid_youtube_authorizations`.
 - [ ] `https://studio.shopauth.cloud/youtube-integration/` returns HTTP 200 without login and describes the app.
-- [ ] Privacy, Terms and Data Deletion URLs return HTTP 200 without login and show “Effective and last updated: August 2, 2026”.
+- [ ] Privacy, Terms and Data Deletion URLs return HTTP 200 without login and show “Effective and last updated: August 3, 2026”.
 - [ ] Public pages use the same product name and logo as the OAuth consent screen.
 - [ ] `shopauth.cloud` ownership verified in Google Search Console by a Google Cloud project owner/editor.
 

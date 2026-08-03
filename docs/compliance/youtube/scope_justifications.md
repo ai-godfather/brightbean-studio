@@ -14,9 +14,9 @@ Demo evidence: after OAuth, show the connected channel card with the same channe
 
 ## `https://www.googleapis.com/auth/youtube.force-ssl`
 
-BrightBean Social Studio uses this scope for implemented comment-management features on the authorized user's channel: reading comment threads, posting a first comment when requested, replying to comments, and moderating comments from the Social Inbox. These write actions require an authorized YouTube scope; `youtube.readonly` cannot create replies or perform moderation. BrightBean does not use this scope to subscribe, like, or manipulate engagement.
+BrightBean Social Studio uses this scope for implemented comment-management features on the authorized user's channel: reading comment threads, posting a first comment when requested, and replying to comments from the Social Inbox. These write actions require an authorized YouTube scope; `youtube.readonly` cannot create comments or replies. BrightBean does not use this scope to subscribe, like, manipulate engagement, or call a comment-moderation endpoint.
 
-Demo evidence: open the YouTube comments/inbox surface, show a comment thread, post a harmless test reply on the reviewer-owned private/unlisted test content if supported, and show the corresponding result in YouTube Studio. If the deployed UI does not expose all of these actions at submission time, remove this scope from both code/consent configuration or finish the UI before submitting.
+Demo evidence: open the YouTube comments/inbox surface, show a comment thread, post a harmless test reply on the reviewer-owned private/unlisted test content, and show the corresponding result in YouTube Studio. If the deployed UI does not expose these actions at submission time, remove this scope from both code/consent configuration or finish the UI before submitting.
 
 ## `https://www.googleapis.com/auth/yt-analytics.readonly`
 
