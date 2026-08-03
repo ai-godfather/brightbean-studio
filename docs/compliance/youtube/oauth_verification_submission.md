@@ -12,7 +12,7 @@
 | Privacy Policy | `https://studio.shopauth.cloud/privacy/` |
 | Terms of Service | `https://studio.shopauth.cloud/terms/` |
 | Authorized domain | `shopauth.cloud` |
-| User support email | `admin@shopauth.cloud` |
+| User support email | `mediainteractiveai@gmail.com` (as configured on the Branding screen) |
 | Developer contact email | `mediainteractiveai@gmail.com` (actively monitored project-owner address) |
 | OAuth client type | Web application |
 | Authorized redirect URI | `https://studio.shopauth.cloud/social-accounts/callback/youtube/` |
