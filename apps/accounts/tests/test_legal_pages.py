@@ -91,9 +91,8 @@ class LegalPagesTests(TestCase):
 
         homepage = self.client.get(reverse("dashboard"))
 
-        self.assertEqual(homepage.status_code, 200)
-        self.assertContains(homepage, "No workspaces yet")
-        self.assertNotContains(homepage, "<h1>BrightBean Social Studio</h1>", html=True)
+        self.assertEqual(homepage.status_code, 302)
+        self.assertRegex(homepage.url, r"^/workspace/[0-9a-f-]+/calendar/$")
 
     def test_individual_operator_and_subscription_disclosures_are_public(self):
         for route_name in ("privacy_policy", "terms_of_service", "data_deletion"):
