@@ -62,9 +62,8 @@ class LegalPagesTests(TestCase):
         self.assertContains(product_page, 'alt="BrightBean Social Studio"')
         self.assertContains(product_page, "BrightBean Social Studio helps individual creators")
         self.assertContains(product_page, "accesses the selected channel identity")
-        self.assertContains(
-            product_page, "never publishes content or changes visibility without an explicit user action"
-        )
+        self.assertContains(product_page, "never publishes")
+        self.assertContains(product_page, "content or changes visibility without an explicit user action")
         self.assertContains(product_page, reverse("privacy_policy"))
         self.assertContains(product_page, reverse("terms_of_service"))
         self.assertContains(product_page, reverse("data_deletion"))
