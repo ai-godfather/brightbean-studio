@@ -1,14 +1,17 @@
 {% extends "legal/base.html" %}
 
-{% block title %}YouTube Integration{% endblock %}
-{% block meta_description %}How BrightBean Social Studio connects to YouTube for user-controlled video publishing, comments, and analytics.{% endblock %}
-{% block heading %}YouTube Integration{% endblock %}
+{% block title %}BrightBean Social Studio — YouTube Publishing and Analytics{% endblock %}
+{% block meta_description %}BrightBean Social Studio helps creators connect a YouTube channel, publish videos and Shorts, manage comments, and view channel and video analytics with user-controlled Google authorization.{% endblock %}
+{% block heading %}BrightBean Social Studio{% endblock %}
 
 {% block content %}
 <p class="summary">
-    BrightBean Social Studio is a content-planning and publishing workspace. Its YouTube integration
-    lets an authorized channel owner or manager prepare, schedule, and upload videos and Shorts,
-    manage comments, and review channel and video analytics from one workspace.
+    BrightBean Social Studio helps individual creators and channel managers connect a YouTube channel
+    and, from one content-planning workspace, prepare, schedule, and upload videos and Shorts, choose
+    video visibility, manage comments, and view channel and video analytics. With the user's permission,
+    the application accesses the selected channel identity, uploads user-selected content, accesses
+    comments for inbox and reply features, and reads channel and video analytics. It never publishes
+    content or changes visibility without an explicit user action.
 </p>
 
 <h2>What the integration does</h2>
@@ -22,9 +25,9 @@
 
 <h2>User control</h2>
 <p>
-    The user initiates each connection and publishing action. BrightBean Studio does not request a
+    The user initiates each connection and publishing action. BrightBean Social Studio does not request a
     Google password and does not change YouTube visibility without the user's selection. Access can
-    be revoked by disconnecting the channel in BrightBean Studio or from
+    be revoked by disconnecting the channel in BrightBean Social Studio or from
     <a href="https://security.google.com/settings/security/permissions" rel="noopener noreferrer">Google's third-party connections settings</a>.
 </p>
 
@@ -41,7 +44,7 @@
     <p>
         Questions about the YouTube integration can be sent to
         <a href="mailto:admin@shopauth.cloud">admin@shopauth.cloud</a>. Existing users can
-        <a href="/accounts/login/">sign in to BrightBean Studio</a> to connect or manage a channel.
+        <a href="/accounts/login/">sign in to BrightBean Social Studio</a> to connect or manage a channel.
     </p>
 </div>
 {% endblock %}

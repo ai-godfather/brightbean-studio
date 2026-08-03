@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}BrightBean Studio legal information.{% endblock %}">
-    <title>{% block title %}Legal{% endblock %} · BrightBean Studio</title>
+    <meta name="description" content="{% block meta_description %}BrightBean Social Studio legal information.{% endblock %}">
+    <title>{% block title %}Legal{% endblock %} · BrightBean Social Studio</title>
     <link rel="icon" href="{% static 'favicon/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon/favicon.svg' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
@@ -57,6 +57,11 @@
             text-decoration: none;
         }
         .brand img { width: 42px; height: 42px; object-fit: contain; }
+        .brand strong {
+            display: block;
+            font-size: 15px;
+            line-height: 1.2;
+        }
         .brand small {
             display: block;
             color: var(--brand-dark);
@@ -131,8 +136,8 @@
     <header class="site-header">
         <div class="header-inner">
             <a class="brand" href="/">
-                <img src="{% static 'img/brightbean-studio-logo.webp' %}" alt="BrightBean Studio">
-                <span><small>BrightBean</small>Social Studio</span>
+                <img src="{% static 'img/brightbean-studio-logo.webp' %}" alt="BrightBean Social Studio">
+                <span><strong>BrightBean Social Studio</strong><small>Content publishing workspace</small></span>
             </a>
             <nav aria-label="Legal navigation">
                 <a href="{% url 'youtube_integration' %}">YouTube</a>
@@ -143,7 +148,7 @@
         </div>
     </header>
     <main>
-        <p class="eyebrow">BrightBean · Social Studio</p>
+        <p class="eyebrow">BrightBean Social Studio</p>
         <h1>{% block heading %}{% endblock %}</h1>
         <p class="updated">Effective and last updated: August 3, 2026</p>
         {% block content %}{% endblock %}
